@@ -10,6 +10,6 @@ Package: this.path
 Version: 0.9.0
 Suggests: utils, microbenchmark
 License: MIT + file LICENSE
-MD5sum: ded64685b2e283529ffd38b25608dffe
+MD5sum: 61be4e3b32059b49a1ec166a2bf97e13
 NeedsCompilation: no
 Enhances: rstudioapi, testthat
