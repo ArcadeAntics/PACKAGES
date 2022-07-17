@@ -138,11 +138,12 @@ build.binaries <- function (pkgs)
 
 
 main <- function() {
-    if (isTRUE(attr(this.path::this.path(verbose = FALSE, default = NULL), "this.path.from.shell")) &&
-        length(pkgs <- commandArgs(trailingOnly = TRUE))) {
-    } else if (interactive()) {
-        pkgs <- strsplit(readline("Packages to build binaries: "), "[, ]+")[[1L]]
-    } else stop("invalid 'commandArgs()'")
+    pkgs <- this.path::fileArgs()
+    if (length(pkgs) <= 0L) {
+        if (interactive())
+            pkgs <- strsplit(readline("Packages to build binaries: "), "[, ]+")[[1L]]
+        else stop("must provide arguments or be in interactive mode")
+    }
     if ("--all" %in% pkgs)
         pkgs <- setdiff(
             read.dcf(
