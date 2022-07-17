@@ -10,12 +10,19 @@ if (any(i <- is.na(x))) {
 }
 
 
-if (isTRUE(attr(this.path::this.path(verbose = FALSE), "this.path.from.shell"))) {
-    FILE <- file.path(dirname(this.path::shFILE()), "..", "bin", "make.binary.R")
-    args <- commandArgs(trailingOnly = TRUE)
-} else {
-    FILE <- this.path::here(.. = 1, "bin", "make.binary.R")
-    args <- strsplit(readline("Packages to build binaries: "), "[, ]+")[[1L]]
+if (this.path::from.shell()) {
+    FILE <- dirname(this.path::shFILE())
+    FILE <- if (FILE == ".")
+        file.path("..", "bin", "make.binary.R")
+    else file.path(FILE, "..", "bin", "make.binary.R")
+} else FILE <- this.path::here(.. = 1, "bin", "make.binary.R")
+args <- this.path::fileArgs()
+if (length(args) <= 0L) {
+    if (interactive())
+        args <- strsplit(readline("Packages to build binaries: "), "[, ]+")[[1L]]
+    else stop("must provide arguments or be in interactive mode")
+    if (length(args) <= 0L)
+        stop("expected at least 1 argument")
 }
 FILE <- paste0("--file=", shQuote(FILE))
 args <- if (length(args)) c("--args", shQuote(args))
