@@ -8,6 +8,7 @@ local({
     fun <- function(command) {
         cat("\n", command, "\n", sep = "")
         res <- system(command)
+        cat("\n")
         if (res) {
             if (res == -1L)
                 stop(gettextf("'%s' could not be run", command), domain = NA)
