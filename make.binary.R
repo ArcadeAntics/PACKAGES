@@ -87,7 +87,7 @@ build.binary <- function (pkg)
 
 
     command <- paste(shQuote(file.path(R.home("bin"), "R")), "CMD", "INSTALL", "--build", shQuote(tar.path))
-    cat("\n", command, sep = "")
+    cat("\n", command, "\n", sep = "")
     res <- system(command)
     cat("\n")
     if (res) {
