@@ -8,4 +8,4 @@ Package: this.path
 Version: 0.10.0
 Suggests: utils, microbenchmark
 License: MIT + file LICENSE
-Enhances: rstudioapi, testthat
+Enhances: rprojroot, rstudioapi, testthat
