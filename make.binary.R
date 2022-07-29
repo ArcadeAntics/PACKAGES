@@ -19,7 +19,7 @@ if (this.path::from.shell()) {
 args <- this.path::fileArgs()
 if (length(args) <= 0L) {
     if (interactive())
-        args <- strsplit(readline("Packages to build binaries: "), "[, ]+")[[1L]]
+        args <- strsplit(readline("Packages to build binaries: "), "[[:blank:]]+|[[:blank:]]*[,;][[:blank:]]*")[[1L]]
     else stop("must provide arguments or be in interactive mode")
     if (length(args) <= 0L)
         stop("expected at least 1 argument")
@@ -28,9 +28,9 @@ FILE <- paste0("--file=", shQuote(FILE))
 args <- if (length(args)) c("--args", shQuote(args))
 
 
-for (name in x) {
+for (name in shQuote(file.path(x, if (.Platform$OS.type == "windows") "R.exe" else "R"))) {
     command <- paste(c(
-        shQuote(file.path(name, "R")),
+        name,
         "--no-echo", "--no-restore",
         FILE, args
     ), collapse = " ")
