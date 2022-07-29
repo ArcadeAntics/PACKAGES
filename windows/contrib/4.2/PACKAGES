@@ -5,6 +5,11 @@ License: MIT + file LICENSE
 Imports: graphics, grDevices, methods, utils, this.path
 Enhances: tcltk
 
+Package: iris
+Version: 0.1.0
+License: MIT + file LICENSE
+Imports: methods
+
 Package: this.path
 Version: 0.10.0
 Suggests: utils, microbenchmark

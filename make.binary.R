@@ -141,7 +141,7 @@ main <- function() {
     pkgs <- this.path::fileArgs()
     if (length(pkgs) <= 0L) {
         if (interactive())
-            pkgs <- strsplit(readline("Packages to build binaries: "), "[, ]+")[[1L]]
+            pkgs <- strsplit(readline("Packages to build binaries: "), "[[:blank:]]+|[[:blank:]]*[,;][[:blank:]]*")[[1L]]
         else stop("must provide arguments or be in interactive mode")
     }
     if ("--all" %in% pkgs)
