@@ -17,8 +17,9 @@ Imports: methods
 Package: music.meta
 Version: 0.1.0
 License: MIT + file LICENSE
-MD5sum: 70014a5a1cbb7e9756fa0c0750b366f4
+MD5sum: 432c3df2eb6d3e5f2462cc5a9662e552
 NeedsCompilation: yes
+Imports: essentials (>= 0.2.0)
 
 Package: polynomial
 Version: 0.1.1
