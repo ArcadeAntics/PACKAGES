@@ -1,3 +1,25 @@
+get.libPath <- function (dir = R.home("bin"))
+{
+    FILE <- tempfile(fileext = ".rds")
+    on.exit(unlink(FILE))
+    e <- Sys.getenv(c("R_LIBS", "R_LIBS_USER", "R_LIBS_SITE"), NA)
+    if (any(i <- is.na(e)))
+        on.exit(Sys.unsetenv(names(which(i))), add = TRUE)
+    if (any(i <- !i))
+        on.exit(do.call(Sys.setenv, as.list(e[i])), add = TRUE)
+    Sys.unsetenv(names(e))
+    command <- paste(shQuote(c(
+        file.path(dir, if (.Platform$OS.type == "windows") "Rscript.exe" else "Rscript"),
+        "--default-packages=NULL", "--vanilla",
+        "-e", "saveRDS(.libPaths(), commandArgs(TRUE)[[1L]])",
+        FILE
+    )), collapse = " ")
+    # cat("\n", command, "\n\n", sep = "")
+    system(command, ignore.stdout = TRUE, ignore.stderr = TRUE)
+    readRDS(FILE)
+}
+
+
 build.binary <- function (pkg)
 {
     main.dir <- this.path::here(.. = 1)
@@ -86,7 +108,8 @@ build.binary <- function (pkg)
     }
 
 
-    command <- paste(shQuote(file.path(R.home("bin"), "R")), "CMD", "INSTALL", "--build", shQuote(tar.path))
+    command <- paste(shQuote(file.path(R.home("bin"), if (.Platform$OS.type == "windows") "R.exe" else "R")),
+        "CMD", "INSTALL", paste0("--library=", shQuote(get.libPath()[[1L]])), "--build", shQuote(tar.path))
     cat("\n", command, "\n", sep = "")
     res <- system(command)
     cat("\n")
