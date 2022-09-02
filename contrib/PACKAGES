@@ -32,6 +32,6 @@ Package: this.path
 Version: 0.10.0
 Suggests: utils, microbenchmark
 License: MIT + file LICENSE
-MD5sum: 1cacc2aa9c00d1860873a17d5177db73
+MD5sum: b32b14f01990976708c7e5e841ec6c6a
 NeedsCompilation: no
 Enhances: rprojroot, rstudioapi, testthat
