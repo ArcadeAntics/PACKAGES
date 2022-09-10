@@ -1,5 +1,5 @@
 Package: essentials
-Version: 0.2.0
+Version: 0.3.0-2
 Suggests: tools
 License: MIT + file LICENSE
 Imports: graphics, grDevices, methods, utils, this.path
@@ -21,7 +21,7 @@ License: MIT + file LICENSE
 Imports: essentials, graphics, grDevices, methods, stats
 
 Package: this.path
-Version: 0.11.0
+Version: 0.11.1
 Suggests: utils, microbenchmark
 License: MIT + file LICENSE
 Enhances: rprojroot, rstudioapi, testthat
