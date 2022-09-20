@@ -1,8 +1,8 @@
 Package: essentials
-Version: 0.3.0-5
+Version: 0.3.0-6
 Suggests: tools
 License: MIT + file LICENSE
-MD5sum: c95653faf081b8f2bf7cf082981d2fcc
+MD5sum: 0a13ca3b4d4a614dbe08d43be1c4441f
 NeedsCompilation: yes
 Imports: graphics, grDevices, methods, utils, this.path
 Enhances: tcltk
@@ -29,9 +29,9 @@ NeedsCompilation: yes
 Imports: essentials, graphics, grDevices, methods, stats
 
 Package: this.path
-Version: 0.11.1
+Version: 0.11.1-7
 Suggests: utils, microbenchmark
 License: MIT + file LICENSE
-MD5sum: 3f158f20862206bf05ceb5c974ea530a
-NeedsCompilation: no
+MD5sum: e0e910610072c70b9c8ecc4692edab13
+NeedsCompilation: yes
 Enhances: rprojroot, rstudioapi, testthat

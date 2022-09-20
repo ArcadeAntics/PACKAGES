@@ -55,6 +55,7 @@ main <- function ()
     }
 
 
+    unloadNamespace("this.path")
     for (name in shQuote(file.path(x, apt))) {
         command <- paste(c(name, args), collapse = " ")
         cat("\n", command, "\n", sep = "")
