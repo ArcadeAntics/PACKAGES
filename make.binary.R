@@ -20,9 +20,11 @@ get.libPath <- function (dir = R.home("bin"))
 }
 
 
+main.dir <- this.path::here(.. = 1)
+
+
 build.binary <- function (pkg)
 {
-    main.dir <- this.path::here(.. = 1)
     src.dir <- file.path("src", "contrib")
     info <- read.dcf(
         file.path(main.dir, src.dir, "PACKAGES"),
@@ -175,6 +177,7 @@ main <- function() {
             ),
             pkgs
         )
+    unloadNamespace("this.path")
     build.binaries(pkgs)
 }
 
