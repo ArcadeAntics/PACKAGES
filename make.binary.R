@@ -58,6 +58,7 @@ build.binary <- function (pkg)
     bin.file <- paste0(pkgname, "_", version, ext)
     bin.dir <- file.path("bin", platform, "contrib", R.version = paste(unclass(getRversion())[[1L]][1:2], collapse = "."))
     bin.path <- file.path(main.dir, bin.dir)
+    dir.create(bin.path, showWarnings = FALSE, recursive = TRUE)
 
 
     exdir <- tempfile("dir")
@@ -77,9 +78,6 @@ build.binary <- function (pkg)
     PACKAGES.info <- t(PACKAGES.info)
 
 
-    dir.create(bin.path, showWarnings = FALSE, recursive = TRUE)
-
-
     owd <- getwd()
     if (is.null(owd)) {
         warning("cannot 'chdir' as current directory is unknown")
@@ -97,13 +95,15 @@ build.binary <- function (pkg)
 
 
     files <- list.files(getwd(), full.names = TRUE)
-    files <- files[startsWith(files, paste0(pkgname, "_"))]
+    files <- files[startsWith(basename(files), paste0(pkgname, "_"))]
     if (length(files) <= 0L) {
     } else if (length(files) == 1L) {
         backup <- tempfile("back_up_", tmpdir = dirname(files), fileext = ext)
-        file.rename(files, backup)
-        on.exit(if (failure) file.rename(backup, files), add = TRUE)
-        on.exit(if (!failure) file.remove(backup), add = TRUE)
+        if (!file.rename(files, backup)) {
+            warning("unable to rename old tarball as a backup")
+            return(FALSE)
+        }
+        on.exit(if (failure) file.rename(backup, files) else file.remove(backup), add = TRUE)
     } else {
         warning("invalid 'files'")
         return(FALSE)
