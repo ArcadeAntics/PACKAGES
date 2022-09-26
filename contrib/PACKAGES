@@ -29,9 +29,9 @@ NeedsCompilation: yes
 Imports: essentials, graphics, grDevices, methods, stats
 
 Package: this.path
-Version: 1.0.2-10
+Version: 1.0.2-11
 Suggests: utils, microbenchmark
 License: MIT + file LICENSE
-MD5sum: b6627da541da56158b64d820291561bb
+MD5sum: 47ecef330d1b7834e17bc23ed291d89d
 NeedsCompilation: yes
 Enhances: rprojroot, rstudioapi, testthat
