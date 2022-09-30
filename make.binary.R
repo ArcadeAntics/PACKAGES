@@ -20,6 +20,10 @@ get.libPath <- function (dir = R.home("bin"))
 }
 
 
+if (!this.path::from.shell())
+    stop("wtf are you doing???")
+
+
 main.dir <- this.path::here(.. = 1)
 
 
@@ -163,7 +167,7 @@ build.binaries <- function (pkgs)
 
 
 main <- function() {
-    pkgs <- this.path::fileArgs()
+    pkgs <- commandArgs(trailingOnly = TRUE)
     if (length(pkgs) <= 0L) {
         if (interactive())
             pkgs <- strsplit(readline("Packages to build binaries: "), "[[:blank:]]+|[[:blank:]]*[,;][[:blank:]]*")[[1L]]
