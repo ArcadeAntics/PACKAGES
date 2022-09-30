@@ -12,18 +12,18 @@ main <- function ()
     }
 
 
-    if (this.path::from.shell()) {
-        FILE <- dirname(this.path::shFILE())
-        FILE <- if (FILE == ".")
-            file.path("..", "bin", "make.binary.R")
-        else file.path(FILE, "..", "bin", "make.binary.R")
-    } else FILE <- this.path::here(.. = 1, "bin", "make.binary.R")
+    if (!this.path::from.shell())
+        stop("wtf are you doing???")
 
 
-    rterm <- startsWith(FILE, "-")
+    FILE <- this.path::dirname2(this.path::shFILE())
+    FILE <- if (FILE == ".") {
+        this.path::path.join("..", "bin", "make.binary.R")
+    } else this.path::path.join(FILE, "..", "bin", "make.binary.R")
 
 
-    args <- this.path::fileArgs()
+
+    args <- commandArgs(trailingOnly = TRUE)
     if (length(args) <= 0L) {
         if (interactive())
             args <- strsplit(readline("Packages to build binaries: "), "[[:blank:]]+|[[:blank:]]*[,;][[:blank:]]*")[[1L]]
@@ -33,12 +33,14 @@ main <- function ()
     }
 
 
-    if (rterm) {
+    if (startsWith(FILE, "-")) {
         apt <- if (.Platform$OS.type == "windows") "Rterm.exe" else "R"
-        R_DEFAULT_PACKAGES <- Sys.getenv("R_DEFAULT_PACKAGES", unset = NA_character_)
-        if (is.na(R_DEFAULT_PACKAGES))
+        R_DEFAULT_PACKAGES <- Sys.getenv("R_DEFAULT_PACKAGES", NA)
+        if (is.na(R_DEFAULT_PACKAGES)) {
             on.exit(Sys.unsetenv("R_DEFAULT_PACKAGES"))
-        else on.exit(Sys.setenv(R_DEFAULT_PACKAGES = R_DEFAULT_PACKAGES))
+        } else {
+            on.exit(Sys.setenv(R_DEFAULT_PACKAGES = R_DEFAULT_PACKAGES))
+        }
         Sys.setenv(R_DEFAULT_PACKAGES = "NULL")
         args <- c(
             "--no-echo", "--no-restore", "--vanilla",
@@ -55,9 +57,10 @@ main <- function ()
     }
 
 
+    apts <- shQuote(this.path::path.join(x, apt))
     unloadNamespace("this.path")
-    for (name in shQuote(file.path(x, apt))) {
-        command <- paste(c(name, args), collapse = " ")
+    for (apt in apts) {
+        command <- paste(c(apt, args), collapse = " ")
         cat("\n", command, "\n", sep = "")
         system(command)
         cat("\n")
