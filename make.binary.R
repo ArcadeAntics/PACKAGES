@@ -1,4 +1,4 @@
-main <- function ()
+main <- function (args = this.path::progArgs())
 {
     x <- Sys.getenv(c("r-release", "r-oldrel"), NA)
     if (any(i <- is.na(x))) {
@@ -13,17 +13,13 @@ main <- function ()
 
 
     if (!this.path::from.shell())
-        stop("wtf are you doing???")
+        stop("can only run from a shell")
 
 
-    FILE <- this.path::dirname2(this.path::shFILE())
-    FILE <- if (FILE == ".") {
-        this.path::path.join("..", "bin", "make.binary.R")
-    } else this.path::path.join(FILE, "..", "bin", "make.binary.R")
+    FILE <- this.path::here(.. = 1, "bin", "make.binary.R")
+    FILE <- this.path::as.rel.path(FILE, relative.to = ".")
 
 
-
-    args <- commandArgs(trailingOnly = TRUE)
     if (length(args) <= 0L) {
         if (interactive())
             args <- strsplit(readline("Packages to build binaries: "), "[[:blank:]]+|[[:blank:]]*[,;][[:blank:]]*")[[1L]]
@@ -68,4 +64,4 @@ main <- function ()
 }
 
 
-main()
+if (this.path::is.main()) main()
