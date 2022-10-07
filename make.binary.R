@@ -166,8 +166,9 @@ build.binaries <- function (pkgs)
 }
 
 
-main <- function() {
-    pkgs <- commandArgs(trailingOnly = TRUE)
+main <- function (args = this.path::progArgs())
+{
+    pkgs <- args
     if (length(pkgs) <= 0L) {
         if (interactive())
             pkgs <- strsplit(readline("Packages to build binaries: "), "[[:blank:]]+|[[:blank:]]*[,;][[:blank:]]*")[[1L]]
