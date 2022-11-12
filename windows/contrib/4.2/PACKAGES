@@ -1,5 +1,5 @@
 Package: essentials
-Version: 0.3.0-9
+Version: 0.3.0.10
 Suggests: tools
 License: MIT + file LICENSE
 Imports: graphics, grDevices, methods, utils, this.path
@@ -21,7 +21,7 @@ License: MIT + file LICENSE
 Imports: essentials, graphics, grDevices, methods, stats
 
 Package: this.path
-Version: 1.0.2-96
+Version: 1.0.2-97
 Depends: R (>= 3.3.0)
 Suggests: utils, microbenchmark
 License: MIT + file LICENSE
