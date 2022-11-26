@@ -36,3 +36,10 @@ License: MIT + file LICENSE
 MD5sum: 2fac54d32058f6c09187eb94750ef2d2
 NeedsCompilation: yes
 Enhances: knitr, rprojroot, rstudioapi, testthat
+
+Package: this.path.helper
+Version: 0.1.0
+Depends: R (>= 3.3.0)
+License: MIT + file LICENSE
+MD5sum: 5f9a58f9ebcf30847e4ff9206aac5014
+NeedsCompilation: yes
