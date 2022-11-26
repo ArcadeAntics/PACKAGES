@@ -26,3 +26,8 @@ Depends: R (>= 3.3.0)
 Suggests: utils, microbenchmark
 License: MIT + file LICENSE
 Enhances: knitr, rprojroot, rstudioapi, testthat
+
+Package: this.path.helper
+Version: 0.1.0
+Depends: R (>= 3.3.0)
+License: MIT + file LICENSE
