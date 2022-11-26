@@ -2,7 +2,7 @@ Package: essentials
 Version: 0.3.0.10
 Suggests: tools
 License: MIT + file LICENSE
-MD5sum: b78edce087196a4634c4720f4e4f6c09
+MD5sum: b6ea010557310a6fe0c6820ce6230517
 NeedsCompilation: yes
 Imports: graphics, grDevices, methods, utils, this.path
 Enhances: tcltk
@@ -41,5 +41,5 @@ Package: this.path.helper
 Version: 0.1.0
 Depends: R (>= 3.3.0)
 License: MIT + file LICENSE
-MD5sum: 5f9a58f9ebcf30847e4ff9206aac5014
+MD5sum: 2e852a52d3344f97be39920c9def401f
 NeedsCompilation: yes
