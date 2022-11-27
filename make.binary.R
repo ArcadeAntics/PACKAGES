@@ -52,7 +52,7 @@ build.binary <- function (pkg)
     if (.Platform$OS.type == "windows") {
         ext <- ".zip"
         platform <- "windows"
-    } else if (capabilities("aqua")) {
+    } else if (grepl("^darwin", R.version$os)) {
         ext <- ".tgz"
         platform <- "macosx"
     } else {
