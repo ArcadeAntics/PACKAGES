@@ -33,7 +33,7 @@ Version: 1.1.0
 Depends: R (>= 3.3.0)
 Suggests: utils, microbenchmark
 License: MIT + file LICENSE
-MD5sum: 2c565be5a5e63e302fc6de8104709d1e
+MD5sum: eb7e59418ade31ab0c742365d2e48d6b
 NeedsCompilation: yes
 Enhances: knitr, rprojroot, rstudioapi, testthat
 
@@ -41,5 +41,5 @@ Package: this.path.helper
 Version: 0.1.0
 Depends: R (>= 3.3.0)
 License: MIT + file LICENSE
-MD5sum: 5a93a0ad80fc286dd822d1a076991b07
+MD5sum: f76b04c50dba9517c1010432d52da77b
 NeedsCompilation: yes
