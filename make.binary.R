@@ -55,6 +55,8 @@ build.binary <- function (pkg)
     } else if (grepl("^darwin", R.version$os)) {
         ext <- ".tgz"
         platform <- "macosx"
+        if (startsWith(.Platform$pkgType, "mac.binary."))
+            platform <- paste(platform, substring(.Platform$pkgType, 12L), sep = "/")
     } else {
         warning("binary packages are not available")
         return(FALSE)
