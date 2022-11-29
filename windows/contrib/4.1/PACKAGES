@@ -22,7 +22,6 @@ Imports: essentials, graphics, grDevices, methods, stats
 
 Package: this.path
 Version: 1.1.0
-Depends: R (>= 3.3.0)
 Suggests: utils, microbenchmark
 License: MIT + file LICENSE
 Enhances: knitr, rprojroot, rstudioapi, testthat
