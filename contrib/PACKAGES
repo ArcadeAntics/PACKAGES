@@ -32,7 +32,7 @@ Package: this.path
 Version: 1.1.0
 Suggests: utils, microbenchmark
 License: MIT + file LICENSE
-MD5sum: 69a7faced95116fc16aa2aa6c2f29bba
+MD5sum: e6c439c6621abaa432f67289f792b8d7
 NeedsCompilation: yes
 Enhances: knitr, rprojroot, rstudioapi, testthat
 
