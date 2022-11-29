@@ -30,10 +30,9 @@ Imports: essentials, graphics, grDevices, methods, stats
 
 Package: this.path
 Version: 1.1.0
-Depends: R (>= 3.3.0)
 Suggests: utils, microbenchmark
 License: MIT + file LICENSE
-MD5sum: 24a8464d2d9a851ff4832fd76f373916
+MD5sum: 69a7faced95116fc16aa2aa6c2f29bba
 NeedsCompilation: yes
 Enhances: knitr, rprojroot, rstudioapi, testthat
 
