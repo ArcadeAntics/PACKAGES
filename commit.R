@@ -18,7 +18,14 @@ local({
 
 
     git <- if (.Platform$OS.type == "windows") "cmd /c git" else "git"
-    for (branch in c("src", "bin")) {
+
+
+    branches <- commandArgs(trailingOnly = TRUE)
+    if (length(branches) <= 0L)
+        branches <- c("src", "bin")
+
+
+    for (branch in branches) {
         setwd(this.path::here(.. = 1, branch))
         fun(sprintf("%s add *"         , git))
         fun(sprintf("%s commit -m %s"  , git, essentials::shEncode(paste("commit", structure(Sys.time(), tzone = "UTC")))))
