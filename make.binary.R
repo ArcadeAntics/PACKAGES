@@ -185,7 +185,6 @@ main <- function (args = this.path::progArgs())
             pkgs
         )
     unloadNamespace("this.path")
-    unloadNamespace("this.path.helper")
     build.binaries(pkgs)
 }
 
