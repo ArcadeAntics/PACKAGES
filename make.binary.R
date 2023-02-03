@@ -55,7 +55,6 @@ main <- function (args = this.path::progArgs())
 
     apts <- shQuote(this.path::path.join(x, apt))
     unloadNamespace("this.path")
-    unloadNamespace("this.path.helper")
     for (apt in apts) {
         command <- paste(c(apt, args), collapse = " ")
         cat("\n", command, "\n", sep = "")
