@@ -17,7 +17,7 @@ main <- function (args = this.path::progArgs())
 
 
     FILE <- this.path::here(.. = 1, "bin", "make.binary.R")
-    FILE <- this.path::as.rel.path(FILE, relative.to = ".")
+    FILE <- this.path::relpath(FILE)
 
 
     if (length(args) <= 0L) {
