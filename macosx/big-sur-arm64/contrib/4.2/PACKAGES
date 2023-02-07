@@ -1,5 +1,5 @@
 Package: this.path
-Version: 1.2.0.7
+Version: 1.2.0.8
 Suggests: utils, microbenchmark
 Enhances: box, knitr, rprojroot, rstudioapi, testthat
 License: MIT + file LICENSE
