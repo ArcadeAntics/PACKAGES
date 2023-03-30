@@ -1,5 +1,5 @@
 Package: this.path
-Version: 1.2.0.21
+Version: 1.2.0.22
 Suggests: utils, microbenchmark
 Enhances: box, IRkernel, jsonlite, knitr, rprojroot, rstudioapi,
         testthat
