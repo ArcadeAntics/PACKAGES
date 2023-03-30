@@ -1,0 +1,31 @@
+
+R version 4.2.3 (2023-03-15 ucrt) -- "Shortstop Beagle"
+Copyright (C) 2023 The R Foundation for Statistical Computing
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> this.path:::libname
+[1] "C:/Users/andre/AppData/Local/Temp/RtmpEDDA2z/RLIBS_1b4859fe48fa"
+> this.path:::pkgname
+[1] "this.path"
+> this.path:::libpath
+[1] "C:/Users/andre/Documents/PACKAGES/src/contrib/this.path.Rcheck/this.path"
+> this.path:::PATH_MAX
+[1] 260
+> this.path:::HAVE_AQUA
+[1] FALSE
+> 
+> proc.time()
+   user  system elapsed 
+   0.09    0.10    0.15 

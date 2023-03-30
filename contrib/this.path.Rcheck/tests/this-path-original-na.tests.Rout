@@ -1,0 +1,91 @@
+
+R version 4.2.3 (2023-03-15 ucrt) -- "Shortstop Beagle"
+Copyright (C) 2023 The R Foundation for Statistical Computing
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> this.path:::write.code({
++     this.path:::withAutoprint({
++         this.path::this.path(original = TRUE)
++         this.path::this.path(original = NA)
++         writeLines(sQuote(this.path::this.path(verbose = TRUE)))
++         this.path::this.path(original = TRUE)
++         this.path::this.path(original = NA)
++     }, spaced = TRUE, verbose = FALSE, width.cutoff = 60L)
++ }, FILE <- tempfile(fileext = ".R"))
+> 
+> 
+> source(FILE, environment(), verbose = FALSE)
+
+> this.path::this.path(original = TRUE)
+[1] "C:\\Users\\andre\\AppData\\Local\\Temp\\RtmpEDDA2z/working_dir\\Rtmp0EvL6b\\file4fa45f483a45.R"
+
+> this.path::this.path(original = NA)
+[1] "C:\\Users\\andre\\AppData\\Local\\Temp\\RtmpEDDA2z/working_dir\\Rtmp0EvL6b\\file4fa45f483a45.R"
+
+> writeLines(sQuote(this.path::this.path(verbose = TRUE)))
+Source: call to function source
+'C:/Users/andre/AppData/Local/Temp/RtmpEDDA2z/working_dir/Rtmp0EvL6b/file4fa45f483a45.R'
+
+> this.path::this.path(original = TRUE)
+[1] "C:\\Users\\andre\\AppData\\Local\\Temp\\RtmpEDDA2z/working_dir\\Rtmp0EvL6b\\file4fa45f483a45.R"
+
+> this.path::this.path(original = NA)
+[1] "C:/Users/andre/AppData/Local/Temp/RtmpEDDA2z/working_dir/Rtmp0EvL6b/file4fa45f483a45.R"
+> sys.source(FILE, environment())
+
+> this.path::this.path(original = TRUE)
+[1] "C:\\Users\\andre\\AppData\\Local\\Temp\\RtmpEDDA2z/working_dir\\Rtmp0EvL6b\\file4fa45f483a45.R"
+
+> this.path::this.path(original = NA)
+[1] "C:\\Users\\andre\\AppData\\Local\\Temp\\RtmpEDDA2z/working_dir\\Rtmp0EvL6b\\file4fa45f483a45.R"
+
+> writeLines(sQuote(this.path::this.path(verbose = TRUE)))
+Source: call to function sys.source
+'C:/Users/andre/AppData/Local/Temp/RtmpEDDA2z/working_dir/Rtmp0EvL6b/file4fa45f483a45.R'
+
+> this.path::this.path(original = TRUE)
+[1] "C:\\Users\\andre\\AppData\\Local\\Temp\\RtmpEDDA2z/working_dir\\Rtmp0EvL6b\\file4fa45f483a45.R"
+
+> this.path::this.path(original = NA)
+[1] "C:/Users/andre/AppData/Local/Temp/RtmpEDDA2z/working_dir/Rtmp0EvL6b/file4fa45f483a45.R"
+> if (.Platform$GUI == "RStudio")
++     debugSource(FILE, local = environment())
+> if (requireNamespace("testthat", quietly = TRUE))
++     testthat::source_file(FILE, environment(), chdir = FALSE, wrap = FALSE)
+> this.path:::.Rscript(c("--default-packages=this.path", "--vanilla", FILE))
+"C:/PROGRA~1/R/R-4.2.3/bin/x64/Rscript.exe" "--default-packages=this.path" "--vanilla" "C:\Users\andre\AppData\Local\Temp\RtmpEDDA2z/working_dir\Rtmp0EvL6b\file4fa45f483a45.R"
+
+> this.path::this.path(original = TRUE)
+[1] "C:\\Users\\andre\\AppData\\Local\\Temp\\RtmpEDDA2z/working_dir\\Rtmp0EvL6b\\file4fa45f483a45.R"
+
+> this.path::this.path(original = NA)
+[1] "C:\\Users\\andre\\AppData\\Local\\Temp\\RtmpEDDA2z/working_dir\\Rtmp0EvL6b\\file4fa45f483a45.R"
+
+> writeLines(sQuote(this.path::this.path(verbose = TRUE)))
+Source: shell argument 'FILE'
+'C:/Users/andre/AppData/Local/Temp/RtmpEDDA2z/working_dir/Rtmp0EvL6b/file4fa45f483a45.R'
+
+> this.path::this.path(original = TRUE)
+[1] "C:\\Users\\andre\\AppData\\Local\\Temp\\RtmpEDDA2z/working_dir\\Rtmp0EvL6b\\file4fa45f483a45.R"
+
+> this.path::this.path(original = NA)
+[1] "C:/Users/andre/AppData/Local/Temp/RtmpEDDA2z/working_dir/Rtmp0EvL6b/file4fa45f483a45.R"
+> 
+> 
+> unlink(FILE)
+> 
+> proc.time()
+   user  system elapsed 
+   0.12    0.04    0.21 

@@ -1,0 +1,42 @@
+* installing *source* package 'this.path' ...
+** using staged installation
+
+getwd(): 'C:/Users/andre/DOCUME~1/PACKAGES/src/contrib/this.path.Rcheck/00_pkg_src/this.path'
+.libPaths(): 
+	'C:/Users/andre/Documents/PACKAGES/src/contrib/this.path.Rcheck/00LOCK-this.path/00new'
+	'C:/Users/andre/Documents/PACKAGES/src/contrib/this.path.Rcheck'
+	'C:/Users/andre/AppData/Local/R/win-library/4.2'
+	'C:/Program Files/R/R-4.2.3/library'
+R_LIBRARY_DIR: 'C:/Users/andre/Documents/PACKAGES/src/contrib/this.path.Rcheck'
+R_PACKAGE_DIR: 'C:/Users/andre/Documents/PACKAGES/src/contrib/this.path.Rcheck/00LOCK-this.path/00new/this.path'
+R_PACKAGE_NAME: 'this.path'
+** libs
+gcc  -I"C:/PROGRA~1/R/R-4.2.3/include" -DNDEBUG     -I"c:/rtools42/x86_64-w64-mingw32.static.posix/include"     -O2 -Wall  -std=gnu99 -mfpmath=sse -msse2 -mstackrealign  -c aquarootscript.c -o aquarootscript.o
+gcc  -I"C:/PROGRA~1/R/R-4.2.3/include" -DNDEBUG     -I"c:/rtools42/x86_64-w64-mingw32.static.posix/include"     -O2 -Wall  -std=gnu99 -mfpmath=sse -msse2 -mstackrealign  -c args.c -o args.o
+gcc  -I"C:/PROGRA~1/R/R-4.2.3/include" -DNDEBUG     -I"c:/rtools42/x86_64-w64-mingw32.static.posix/include"     -O2 -Wall  -std=gnu99 -mfpmath=sse -msse2 -mstackrealign  -c backports.c -o backports.o
+gcc  -I"C:/PROGRA~1/R/R-4.2.3/include" -DNDEBUG     -I"c:/rtools42/x86_64-w64-mingw32.static.posix/include"     -O2 -Wall  -std=gnu99 -mfpmath=sse -msse2 -mstackrealign  -c basename2.c -o basename2.o
+gcc  -I"C:/PROGRA~1/R/R-4.2.3/include" -DNDEBUG     -I"c:/rtools42/x86_64-w64-mingw32.static.posix/include"     -O2 -Wall  -std=gnu99 -mfpmath=sse -msse2 -mstackrealign  -c drivewidth.c -o drivewidth.o
+gcc  -I"C:/PROGRA~1/R/R-4.2.3/include" -DNDEBUG     -I"c:/rtools42/x86_64-w64-mingw32.static.posix/include"     -O2 -Wall  -std=gnu99 -mfpmath=sse -msse2 -mstackrealign  -c ext.c -o ext.o
+gcc  -I"C:/PROGRA~1/R/R-4.2.3/include" -DNDEBUG     -I"c:/rtools42/x86_64-w64-mingw32.static.posix/include"     -O2 -Wall  -std=gnu99 -mfpmath=sse -msse2 -mstackrealign  -c hooks-for-namespace-events.c -o hooks-for-namespace-events.o
+gcc  -I"C:/PROGRA~1/R/R-4.2.3/include" -DNDEBUG     -I"c:/rtools42/x86_64-w64-mingw32.static.posix/include"     -O2 -Wall  -std=gnu99 -mfpmath=sse -msse2 -mstackrealign  -c init.c -o init.o
+gcc  -I"C:/PROGRA~1/R/R-4.2.3/include" -DNDEBUG     -I"c:/rtools42/x86_64-w64-mingw32.static.posix/include"     -O2 -Wall  -std=gnu99 -mfpmath=sse -msse2 -mstackrealign  -c isabspath.c -o isabspath.o
+gcc  -I"C:/PROGRA~1/R/R-4.2.3/include" -DNDEBUG     -I"c:/rtools42/x86_64-w64-mingw32.static.posix/include"     -O2 -Wall  -std=gnu99 -mfpmath=sse -msse2 -mstackrealign  -c pathjoin.c -o pathjoin.o
+gcc  -I"C:/PROGRA~1/R/R-4.2.3/include" -DNDEBUG     -I"c:/rtools42/x86_64-w64-mingw32.static.posix/include"     -O2 -Wall  -std=gnu99 -mfpmath=sse -msse2 -mstackrealign  -c pathsplit.c -o pathsplit.o
+gcc  -I"C:/PROGRA~1/R/R-4.2.3/include" -DNDEBUG     -I"c:/rtools42/x86_64-w64-mingw32.static.posix/include"     -O2 -Wall  -std=gnu99 -mfpmath=sse -msse2 -mstackrealign  -c promises.c -o promises.o
+gcc  -I"C:/PROGRA~1/R/R-4.2.3/include" -DNDEBUG     -I"c:/rtools42/x86_64-w64-mingw32.static.posix/include"     -O2 -Wall  -std=gnu99 -mfpmath=sse -msse2 -mstackrealign  -c shfile.c -o shfile.o
+gcc  -I"C:/PROGRA~1/R/R-4.2.3/include" -DNDEBUG     -I"c:/rtools42/x86_64-w64-mingw32.static.posix/include"     -O2 -Wall  -std=gnu99 -mfpmath=sse -msse2 -mstackrealign  -c thispath.c -o thispath.o
+gcc  -I"C:/PROGRA~1/R/R-4.2.3/include" -DNDEBUG     -I"c:/rtools42/x86_64-w64-mingw32.static.posix/include"     -O2 -Wall  -std=gnu99 -mfpmath=sse -msse2 -mstackrealign  -c thispathdefn.c -o thispathdefn.o
+gcc  -I"C:/PROGRA~1/R/R-4.2.3/include" -DNDEBUG     -I"c:/rtools42/x86_64-w64-mingw32.static.posix/include"     -O2 -Wall  -std=gnu99 -mfpmath=sse -msse2 -mstackrealign  -c utils.c -o utils.o
+gcc  -I"C:/PROGRA~1/R/R-4.2.3/include" -DNDEBUG     -I"c:/rtools42/x86_64-w64-mingw32.static.posix/include"     -O2 -Wall  -std=gnu99 -mfpmath=sse -msse2 -mstackrealign  -c wrapsource.c -o wrapsource.o
+gcc -shared -s -static-libgcc -o this.path.dll tmp.def aquarootscript.o args.o backports.o basename2.o drivewidth.o ext.o hooks-for-namespace-events.o init.o isabspath.o pathjoin.o pathsplit.o promises.o shfile.o thispath.o thispathdefn.o utils.o wrapsource.o -Lc:/rtools42/x86_64-w64-mingw32.static.posix/lib/x64 -Lc:/rtools42/x86_64-w64-mingw32.static.posix/lib -LC:/PROGRA~1/R/R-4.2.3/bin/x64 -lR
+installing to C:/Users/andre/Documents/PACKAGES/src/contrib/this.path.Rcheck/00LOCK-this.path/00new/this.path/libs/x64
+** R
+** inst
+** byte-compile and prepare package for lazy loading
+** help
+*** installing help indices
+** building package indices
+** testing if installed package can be loaded from temporary location
+** testing if installed package can be loaded from final location
+** testing if installed package keeps a record of temporary installation path
+* DONE (this.path)

@@ -1,0 +1,66 @@
+
+R version 4.2.3 (2023-03-15 ucrt) -- "Shortstop Beagle"
+Copyright (C) 2023 The R Foundation for Statistical Computing
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> main <- function ()
++ {
++     FILE <- tempfile(fileext = ".R")
++     on.exit(unlink(FILE), add = TRUE)
++     this.path:::write.code(file = FILE, {
++         if (requireNamespace("microbenchmark")) {
++             invisible(loadNamespace("microbenchmark"))
++             invisible(loadNamespace("this.path"))
++             print(this.path:::faster.subsequent.times.test())
++         } else cat("\npackage {microbenchmark} is not available :(\n")
++     })
++     cat("\n")
++     this.path:::.Rscript(c("--default-packages=NULL", "--vanilla", FILE))
++ 
++ 
++     cat("\n> source(FILE, chdir = FALSE)\n")
++     source(FILE, chdir = FALSE)
++ 
++ 
++     cat("\n> source(FILE, chdir = TRUE)\n")
++     source(FILE, chdir = TRUE)
++ }
+> 
+> 
+> main()
+
+"C:/PROGRA~1/R/R-4.2.3/bin/x64/Rscript.exe" "--default-packages=NULL" "--vanilla" "C:\Users\andre\AppData\Local\Temp\RtmpEDDA2z/working_dir\RtmpUZD980\file16d437994d0d.R"
+Loading required namespace: microbenchmark
+Unit: microseconds
+       expr   min    lq    mean median    uq   max neval
+ first time 569.9 569.9 569.900  569.9 569.9 569.9     1
+ subsequent   5.4   5.6   5.839    5.7   5.7  18.5   100
+
+> source(FILE, chdir = FALSE)
+Loading required namespace: microbenchmark
+Unit: microseconds
+       expr   min    lq    mean median    uq   max neval
+ first time 362.8 362.8 362.800  362.8 362.8 362.8     1
+ subsequent   6.1   6.3   6.896    6.4   6.6  19.6   100
+
+> source(FILE, chdir = TRUE)
+Unit: microseconds
+       expr   min    lq   mean median    uq   max neval
+ first time 413.5 413.5 413.50  413.5 413.5 413.5     1
+ subsequent   6.1   6.3   6.73    6.4   6.6  27.2   100
+> 
+> proc.time()
+   user  system elapsed 
+   0.26    0.03    0.42 
