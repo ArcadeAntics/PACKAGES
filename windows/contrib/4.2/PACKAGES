@@ -13,7 +13,7 @@ Imports: methods
 Package: music.meta
 Version: 0.1.0
 License: MIT + file LICENSE
-Imports: essentials (>= 0.2.0)
+Imports: essentials, methods, this.path
 
 Package: polynomial
 Version: 0.1.1
@@ -21,7 +21,7 @@ License: MIT + file LICENSE
 Imports: essentials, graphics, grDevices, methods, stats
 
 Package: this.path
-Version: 1.2.0.18
+Version: 1.2.0.19
 Suggests: utils, microbenchmark
 License: MIT + file LICENSE
 Enhances: box, IRkernel, jsonlite, knitr, rprojroot, rstudioapi,
