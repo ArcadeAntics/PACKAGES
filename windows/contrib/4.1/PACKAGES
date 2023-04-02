@@ -21,8 +21,8 @@ License: MIT + file LICENSE
 Imports: essentials, graphics, grDevices, methods, stats
 
 Package: this.path
-Version: 1.2.0.23
+Version: 1.2.0.24
 Suggests: utils, microbenchmark
 License: MIT + file LICENSE
-Enhances: box, IRkernel, jsonlite, knitr, rprojroot, rstudioapi,
-        testthat
+Enhances: box, compiler, IRkernel, jsonlite, knitr, rprojroot,
+        rstudioapi, testthat
