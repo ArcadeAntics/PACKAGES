@@ -14,6 +14,12 @@ MD5sum: b4570b78a4c30ce90c3dfea02212d208
 NeedsCompilation: no
 Imports: methods
 
+Package: module
+Version: 0.1.0
+License: MIT + file LICENSE
+MD5sum: 2436ffba279d05628f000635ff9a409c
+NeedsCompilation: yes
+
 Package: music.meta
 Version: 0.1.0
 License: MIT + file LICENSE
@@ -32,6 +38,6 @@ Package: this.path
 Version: 1.2.0.26
 Suggests: utils, microbenchmark
 License: MIT + file LICENSE
-MD5sum: ea68adeedd58645521d0ae265db97a9c
+MD5sum: eff92eaad0788ba8f6cf2c90401af34b
 NeedsCompilation: yes
 Enhances: box, compiler, IRkernel, jsonlite, knitr, rprojroot, rstudioapi, testthat
