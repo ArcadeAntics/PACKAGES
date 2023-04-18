@@ -1,0 +1,7 @@
+Package: this.path
+Version: 1.3.0.3
+Suggests: utils, microbenchmark
+Enhances: box, compiler, IRkernel, jsonlite, knitr, rprojroot,
+        rstudioapi, testthat
+License: MIT + file LICENSE
+Archs: this.path.so.dSYM
