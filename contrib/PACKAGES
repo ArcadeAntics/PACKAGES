@@ -17,7 +17,7 @@ Imports: methods
 Package: module
 Version: 0.1.0
 License: MIT + file LICENSE
-MD5sum: 2436ffba279d05628f000635ff9a409c
+MD5sum: 608ba75a0f6d2cff2e874736488a9316
 NeedsCompilation: yes
 
 Package: music.meta
@@ -35,9 +35,9 @@ NeedsCompilation: yes
 Imports: essentials, graphics, grDevices, methods, stats
 
 Package: this.path
-Version: 1.4.0.7
+Version: 1.4.0.8
 Suggests: utils, microbenchmark
 License: MIT + file LICENSE
-MD5sum: 76eaff1fc5425da673e31665e6f7c331
+MD5sum: 924977d0c7212df147cef38c1ab0d6bb
 NeedsCompilation: yes
 Enhances: compiler, box, IRkernel, jsonlite, knitr, rprojroot, rstudioapi, testthat
