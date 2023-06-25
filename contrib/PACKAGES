@@ -2,7 +2,7 @@ Package: essentials
 Version: 0.3.0.13
 Suggests: tools
 License: MIT + file LICENSE
-MD5sum: 058bdd88d01bfd044407c2a219815f00
+MD5sum: a37d018860777e8c19e424e088dbdbd9
 NeedsCompilation: yes
 Imports: graphics, grDevices, methods, utils, this.path
 Enhances: tcltk
@@ -17,7 +17,7 @@ Imports: methods
 Package: module
 Version: 0.1.0
 License: MIT + file LICENSE
-MD5sum: 608ba75a0f6d2cff2e874736488a9316
+MD5sum: 08a3b4af2fc34c03f6a3e30d39077171
 NeedsCompilation: yes
 
 Package: music.meta
@@ -35,9 +35,9 @@ NeedsCompilation: yes
 Imports: essentials, graphics, grDevices, methods, stats
 
 Package: this.path
-Version: 1.4.0.8
+Version: 1.4.0.9
 Suggests: utils, microbenchmark
 License: MIT + file LICENSE
-MD5sum: 924977d0c7212df147cef38c1ab0d6bb
+MD5sum: 3046d429b32387709e2eda34e9f64f86
 NeedsCompilation: yes
 Enhances: compiler, box, IRkernel, jsonlite, knitr, rprojroot, rstudioapi, testthat
