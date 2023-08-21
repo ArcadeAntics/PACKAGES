@@ -18,7 +18,7 @@ Package: module
 Version: 0.1.0
 Depends: R (>= 4.0)
 License: MIT + file LICENSE
-MD5sum: b42567dee5a7e46e19e2283179edb2f4
+MD5sum: 90304f9b63a1e7f55fdd625effc4e79e
 NeedsCompilation: yes
 Imports: this.path
 
@@ -37,9 +37,9 @@ NeedsCompilation: yes
 Imports: essentials, graphics, grDevices, methods, stats
 
 Package: this.path
-Version: 2.0.0.1
+Version: 2.0.0.2
 Suggests: utils, microbenchmark
 License: MIT + file LICENSE
-MD5sum: 3999390f10665e59172e5ea69b2bbcc9
+MD5sum: a95367cfd123a476aa4d8d6e72befd96
 NeedsCompilation: yes
 Enhances: compiler, box, IRkernel, jsonlite, knitr, rprojroot, rstudioapi, testthat
