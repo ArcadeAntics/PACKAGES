@@ -1,6 +1,6 @@
 main <- function (args = this.path::progArgs())
 {
-    x <- Sys.getenv(c("r-release", "r-oldrel"), NA)
+    x <- Sys.getenv(c("r_release", "r_oldrel"), NA)
     if (any(i <- is.na(x))) {
         warning(sprintf(
             ngettext(sum(i), "environment variable %s is not defined",
