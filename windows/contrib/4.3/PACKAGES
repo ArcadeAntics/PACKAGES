@@ -1,6 +1,6 @@
 Package: this.path
-Version: 2.0.0.16
+Version: 2.1.0.1
 Suggests: utils, microbenchmark
 License: MIT + file LICENSE
 Enhances: compiler, box, IRkernel, jsonlite, knitr, plumber, rprojroot,
-        rstudioapi, shiny, testthat
+        rstudioapi, shiny, targets, testthat
