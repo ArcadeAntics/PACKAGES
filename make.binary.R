@@ -3,10 +3,10 @@ get.libPath <- function (dir = R.home("bin"))
     FILE <- tempfile(fileext = ".rds")
     on.exit(unlink(FILE))
     e <- Sys.getenv(c("R_LIBS", "R_LIBS_USER", "R_LIBS_SITE"), NA)
-    if (any(i <- is.na(e)))
-        on.exit(Sys.unsetenv(names(which(i))), add = TRUE)
-    if (any(i <- !i))
-        on.exit(do.call(Sys.setenv, as.list(e[i])), add = TRUE)
+    if (any(unset <- is.na(e)))
+        on.exit(Sys.unsetenv(names(which(unset))), add = TRUE)
+    if (any(set <- !unset))
+        on.exit(do.call(Sys.setenv, as.list(e[set])), add = TRUE)
     Sys.unsetenv(names(e))
     command <- paste(shQuote(c(
         file.path(dir, if (.Platform$OS.type == "windows") "Rscript.exe" else "Rscript"),
@@ -62,7 +62,7 @@ build.binary <- function (pkg)
         return(FALSE)
     }
     bin.file <- paste0(pkgname, "_", version, ext)
-    bin.dir <- file.path("bin", platform, "contrib", R.version = paste(unclass(getRversion())[[1L]][1:2], collapse = "."))
+    bin.dir <- file.path("bin", platform, "contrib", R.version = sub("^([[:digit:]]+\\.[[:digit:]]+)\\.[[:digit:]]+$", "\\1", getRversion()))
     bin.path <- file.path(main.dir, bin.dir)
     dir.create(bin.path, showWarnings = FALSE, recursive = TRUE)
 
@@ -116,8 +116,12 @@ build.binary <- function (pkg)
     }
 
 
-    command <- paste(shQuote(file.path(R.home("bin"), if (.Platform$OS.type == "windows") "R.exe" else "R")),
-        "CMD", "INSTALL", paste0("--library=", shQuote(get.libPath()[[1L]])), "--build", shQuote(tar.path))
+    command <- if (.Platform$OS.type == "windows") {
+        shQuote(file.path(R.home("bin"), "Rcmd.exe"))
+    } else {
+        c(shQuote(file.path(R.home("bin"), "R")), "CMD")
+    }
+    command <- paste(command, "INSTALL", shQuote(paste0("--library=", get.libPath()[[1L]])), "--build", shQuote(tar.path))
     cat("\n", command, "\n", sep = "")
     res <- system(command)
     cat("\n")
