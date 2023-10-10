@@ -40,7 +40,7 @@ Package: this.path
 Version: 2.1.0.9
 Suggests: utils, microbenchmark
 License: MIT + file LICENSE
-MD5sum: 8047f80fd3e23399ff1dc740cad865e9
+MD5sum: 066640314f1b8257548aa64b36a73fce
 NeedsCompilation: yes
-Enhances: compiler, box, IRkernel, jsonlite, knitr, plumber, rprojroot, rstudioapi,
-         shiny, targets, testthat
+Enhances: compiler, box, IRkernel, jsonlite, knitr, plumber, rprojroot,
+         rstudioapi, shiny, targets, testthat
