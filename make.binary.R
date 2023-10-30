@@ -9,7 +9,7 @@ if (!this.path::from.shell())
 main.dir <- this.path::here(.. = 1)
 
 
-if (!exists("startsWith",mode = "function")) {
+if (!exists("startsWith", mode = "function")) {
     startsWith <- function(x, prefix) {
         pattern <- gsub("([.\\\\|()[{^$*+?])", "\\\\\\1", prefix)
         pattern <- paste0("^", pattern)
