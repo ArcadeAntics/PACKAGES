@@ -1,23 +1,5 @@
-get.libPath <- function (dir = R.home("bin"))
-{
-    FILE <- tempfile(fileext = ".rds")
-    on.exit(unlink(FILE))
-    e <- Sys.getenv(c("R_LIBS", "R_LIBS_USER", "R_LIBS_SITE"), NA)
-    if (any(unset <- is.na(e)))
-        on.exit(Sys.unsetenv(names(which(unset))), add = TRUE)
-    if (any(set <- !unset))
-        on.exit(do.call(Sys.setenv, as.list(e[set])), add = TRUE)
-    Sys.unsetenv(names(e))
-    command <- paste(shQuote(c(
-        file.path(dir, if (.Platform$OS.type == "windows") "Rscript.exe" else "Rscript"),
-        "--default-packages=NULL", "--vanilla",
-        "-e", "saveRDS(.libPaths(), commandArgs(TRUE)[[1L]])",
-        FILE
-    )), collapse = " ")
-    # cat("\n", command, "\n\n", sep = "")
-    system(command, ignore.stdout = TRUE, ignore.stderr = TRUE)
-    readRDS(FILE)
-}
+if (getRversion() < "2.15.0")
+    stop("only valid for R >= 2.15")
 
 
 if (!this.path::from.shell())
@@ -55,7 +37,7 @@ build.binary <- function (pkg)
     } else if (grepl("^darwin", R.version$os)) {
         ext <- ".tgz"
         platform <- "macosx"
-        if (startsWith(.Platform$pkgType, "mac.binary."))
+        if (grepl("^mac\\.binary\\.", .Platform$pkgType))
             platform <- paste(platform, substring(.Platform$pkgType, 12L), sep = "/")
     } else {
         warning("binary packages are not available")
@@ -101,7 +83,8 @@ build.binary <- function (pkg)
 
 
     files <- list.files(getwd(), full.names = TRUE)
-    files <- files[startsWith(basename(files), paste0(pkgname, "_"))]
+    files <- files[grep(paste0("^", gsub(".", "\\.", pkgname, fixed = TRUE), "_"), basename(files))]
+    files <- files[grep(paste0("^", gsub(".", "\\.", pkgname, fixed = TRUE), "_"), basename(files))]
     if (length(files) <= 0L) {
     } else if (length(files) == 1L) {
         backup <- tempfile("back_up_", tmpdir = dirname(files), fileext = ext)
@@ -121,7 +104,7 @@ build.binary <- function (pkg)
     } else {
         c(shQuote(file.path(R.home("bin"), "R")), "CMD")
     }
-    command <- paste(command, "INSTALL", shQuote(paste0("--library=", get.libPath()[[1L]])), "--build", shQuote(tar.path))
+    command <- paste(command, "INSTALL", "--build", shQuote(tar.path))
     cat("\n", command, "\n", sep = "")
     res <- system(command)
     cat("\n")
@@ -139,7 +122,7 @@ build.binary <- function (pkg)
         tryCatch({
             if (i <- match(paste0("Package: ", pkgname), text, 0L)) {
                 writeLines(text[seq_len(i - 1L)], con)
-            } else if (i <- match(TRUE, startsWith(text, "Package: ") & substr(text, 10L, 1000000L) > pkgname, 0L)) {
+            } else if (i <- match(TRUE, grepl("^Package: ", text) & substr(text, 10L, 1000000L) > pkgname, 0L)) {
                 writeLines(text[seq_len(i - 1L)], con)
             } else {
                 i <- length(text)
