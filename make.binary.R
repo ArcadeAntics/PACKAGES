@@ -9,6 +9,17 @@ if (!this.path::from.shell())
 main.dir <- this.path::here(.. = 1)
 
 
+if (!exists("startsWith",mode = "function")) {
+    startsWith <- function(x, prefix) {
+        pattern <- gsub("([.\\\\|()[{^$*+?])", "\\\\\\1", prefix)
+        pattern <- paste0("^", pattern)
+        grepl(pattern, x)
+    }
+    environment(startsWith) <- .BaseNamespaceEnv
+    attributes(startsWith) <- NULL
+}
+
+
 build.binary <- function (pkg)
 {
     src.dir <- file.path("src", "contrib")
@@ -37,7 +48,7 @@ build.binary <- function (pkg)
     } else if (grepl("^darwin", R.version$os)) {
         ext <- ".tgz"
         platform <- "macosx"
-        if (grepl("^mac\\.binary\\.", .Platform$pkgType))
+        if (startsWith(.Platform$pkgType, "mac.binary."))
             platform <- paste(platform, substring(.Platform$pkgType, 12L), sep = "/")
     } else {
         warning("binary packages are not available")
@@ -83,8 +94,7 @@ build.binary <- function (pkg)
 
 
     files <- list.files(getwd(), full.names = TRUE)
-    files <- files[grep(paste0("^", gsub(".", "\\.", pkgname, fixed = TRUE), "_"), basename(files))]
-    files <- files[grep(paste0("^", gsub(".", "\\.", pkgname, fixed = TRUE), "_"), basename(files))]
+    files <- files[startsWith(basename(files), paste0(pkgname, "_"))]
     if (length(files) <= 0L) {
     } else if (length(files) == 1L) {
         backup <- tempfile("back_up_", tmpdir = dirname(files), fileext = ext)
@@ -122,7 +132,7 @@ build.binary <- function (pkg)
         tryCatch({
             if (i <- match(paste0("Package: ", pkgname), text, 0L)) {
                 writeLines(text[seq_len(i - 1L)], con)
-            } else if (i <- match(TRUE, grepl("^Package: ", text) & substr(text, 10L, 1000000L) > pkgname, 0L)) {
+            } else if (i <- match(TRUE, startsWith(text, "Package: ") & substr(text, 10L, 1000000L) > pkgname, 0L)) {
                 writeLines(text[seq_len(i - 1L)], con)
             } else {
                 i <- length(text)
