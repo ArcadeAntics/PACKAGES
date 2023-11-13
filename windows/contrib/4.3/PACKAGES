@@ -1,5 +1,5 @@
 Package: this.path
-Version: 2.2.0.5
+Version: 2.2.0.6
 Suggests: utils, microbenchmark
 License: MIT + file LICENSE
 Enhances: compiler, box, IRkernel, jsonlite, knitr, plumber, rprojroot,
