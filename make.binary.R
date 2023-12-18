@@ -2,11 +2,12 @@ if (getRversion() < "2.15.0")
     stop("only valid for R >= 2.15")
 
 
-if (!this.path::from.shell())
-    stop("wtf are you doing???")
+if (sys.nframe())
+    stop("must be run in a top level context")
 
 
-main.dir <- this.path::here(.. = 1)
+args <- commandArgs(trailingOnly = TRUE)
+main.dir <- args[[1L]]; args <- args[-1L]
 
 
 if (!exists("startsWith", mode = "function")) {
@@ -165,7 +166,7 @@ build.binaries <- function (pkgs)
 }
 
 
-main <- function (args = this.path::progArgs())
+main <- function ()
 {
     pkgs <- args
     if (length(pkgs) <= 0L) {
@@ -176,12 +177,11 @@ main <- function (args = this.path::progArgs())
     if ("--all" %in% pkgs)
         pkgs <- setdiff(
             read.dcf(
-                this.path::here(.. = 1, "src", "contrib", "PACKAGES"),
+                file.path(main.dir, "src", "contrib", "PACKAGES"),
                 fields = "Package"
             ),
             pkgs
         )
-    unloadNamespace("this.path")
     build.binaries(pkgs)
 }
 
