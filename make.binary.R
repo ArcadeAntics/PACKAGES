@@ -45,28 +45,30 @@ main <- function (args = this.path::progArgs())
         if (length(args) <= 0L)
             stop("expected at least 1 argument")
     }
+    ## add main.dir to args
+    args <- c(this.path::here(.. = 1), args)
 
 
     if (startsWith(FILE, "-")) {
         apt <- if (.Platform$OS.type == "windows") "Rterm.exe" else "R"
         R_DEFAULT_PACKAGES <- Sys.getenv("R_DEFAULT_PACKAGES", NA)
         if (is.na(R_DEFAULT_PACKAGES)) {
-            on.exit(Sys.unsetenv("R_DEFAULT_PACKAGES"))
+            on.exit(Sys.unsetenv("R_DEFAULT_PACKAGES"), add = TRUE)
         } else {
-            on.exit(Sys.setenv(R_DEFAULT_PACKAGES = R_DEFAULT_PACKAGES))
+            on.exit(Sys.setenv(R_DEFAULT_PACKAGES = R_DEFAULT_PACKAGES), add = TRUE)
         }
         Sys.setenv(R_DEFAULT_PACKAGES = "NULL")
         args <- c(
-            "-s", "--no-restore", "--vanilla",
+            "-s", "--no-restore", if (.Platform$OS.type == "unix") "--no-readline", "--vanilla",
             paste0("--file=", shQuote(FILE)),
-            if (length(args)) c("--args", shQuote(args))
+            "--args", shQuote(args)
         )
     } else {
         apt <- if (.Platform$OS.type == "windows") "Rscript.exe" else "Rscript"
         args <- c(
             "--default-packages=NULL", "--vanilla",
             shQuote(FILE),
-            if (length(args)) shQuote(args)
+            shQuote(args)
         )
     }
 
