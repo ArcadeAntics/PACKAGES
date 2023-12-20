@@ -37,9 +37,10 @@ NeedsCompilation: yes
 Imports: essentials, graphics, grDevices, methods, stats
 
 Package: this.path
-Version: 2.3.1.1
+Version: 2.3.1.2
 Suggests: utils, microbenchmark
 License: MIT + file LICENSE
-MD5sum: d8a87d83d7c10160912e943d0bf31407
+MD5sum: bfccb2bee2b1b8f28ba094a0e9e9c4d7
 NeedsCompilation: yes
-Enhances: compiler, box, IRkernel, jsonlite, knitr, plumber, rprojroot, rstudioapi, shiny, targets, testthat
+Enhances: compiler, box, IRkernel, jsonlite, knitr, plumber, rprojroot,
+        rstudioapi, shiny, targets, testthat
