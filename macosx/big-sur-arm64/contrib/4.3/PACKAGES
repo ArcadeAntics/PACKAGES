@@ -1,7 +1,7 @@
 Package: this.path
-Version: 2.3.1.24
+Version: 2.3.1.25
 Suggests: utils, microbenchmark
 Enhances: compiler, box, IRkernel, jsonlite, knitr, plumber, rprojroot,
-        rstudioapi, shiny, targets, testthat
+        shiny, targets, testthat
 License: MIT + file LICENSE
 Archs: this.path.so.dSYM
