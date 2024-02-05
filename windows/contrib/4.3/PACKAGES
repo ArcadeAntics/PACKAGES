@@ -1,6 +1,6 @@
-Package: this.path
-Version: 2.3.1.27
-Suggests: utils, microbenchmark
+Package: essentials
+Version: 0.3.0.13
+Suggests: tools
 License: MIT + file LICENSE
-Enhances: compiler, box, IRkernel, jsonlite, knitr, plumber, rprojroot,
-        shiny, targets, testthat
+Imports: graphics, grDevices, methods, utils, this.path
+Enhances: tcltk
