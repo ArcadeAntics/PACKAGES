@@ -1,6 +1,6 @@
 Package: this.path
-Version: 2.3.1.27
-Suggests: utils, microbenchmark
+Version: 2.3.1.30
+Suggests: utils, jsonlite, microbenchmark
 License: MIT + file LICENSE
-Enhances: compiler, box, IRkernel, jsonlite, knitr, plumber, rprojroot,
-        shiny, targets, testthat
+Enhances: compiler, box, knitr, plumber, rprojroot, shiny, targets,
+        testthat
