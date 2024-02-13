@@ -6,7 +6,7 @@ Imports: graphics, grDevices, methods, utils, this.path
 Enhances: tcltk
 
 Package: this.path
-Version: 2.3.1.30
+Version: 2.3.1.31
 Suggests: utils, jsonlite, microbenchmark
 License: MIT + file LICENSE
 Enhances: compiler, box, knitr, plumber, rprojroot, shiny, targets,
