@@ -2,7 +2,7 @@ Package: essentials
 Version: 0.3.0.13
 Suggests: tools
 License: MIT + file LICENSE
-MD5sum: 57e5715867cbc050186588ae3b3b69ab
+MD5sum: ac34bf05a9be36163ebbb769d839df3a
 NeedsCompilation: yes
 Imports: graphics, grDevices, methods, utils, this.path
 Enhances: tcltk
@@ -42,5 +42,5 @@ Suggests: utils, jsonlite, microbenchmark
 License: MIT + file LICENSE
 MD5sum: f2bd20d1c71495431282375775422633
 NeedsCompilation: yes
-Enhances: compiler, box, knitr, plumber, rprojroot,
-      shiny, targets, testthat
+Enhances: compiler, box, knitr, plumber, rprojroot, shiny, targets,
+        testthat
