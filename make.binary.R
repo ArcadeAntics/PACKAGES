@@ -147,19 +147,19 @@ main <- function (args = this.path::progArgs())
 
         exdir <- tempfile("dir")
         utils::untar(tar_path, DESCRIPTION_file <- file.path(pkgname, "DESCRIPTION"), exdir = exdir)
-        packageInfo <- read.dcf(file.path(exdir, DESCRIPTION_file))
+        desc <- read.dcf(file.path(exdir, DESCRIPTION_file))
         unlink(exdir, recursive = TRUE, force = TRUE)
-        if (nrow(packageInfo) != 1L) {
+        if (nrow(desc) != 1L) {
             warning("bruh wtf are you doing???")
             return(FALSE)
         }
-        packageInfo <- structure(c(packageInfo), names = colnames(packageInfo))
+        desc <- structure(c(desc), names = colnames(desc))
 
 
         fields <- c("Package", "Version", "Depends", "Suggests",
             "License", "Imports", "LinkingTo", "Enhances", "OS_type")
-        packageInfo <- structure(packageInfo[fields], names = fields)
-        packageInfo <- t(packageInfo)
+        desc <- structure(desc[fields], names = fields)
+        desc <- t(desc)
 
 
         failure <- TRUE
@@ -193,15 +193,17 @@ main <- function (args = this.path::progArgs())
             text <- readLines(PACKAGES_path)
             conn <- file("./PACKAGES", "w")
             tryCatch({
-                if (i <- match(paste0("Package: ", pkgname), text, 0L)) {
+                matchThis <- paste0("Package: ", pkgname)
+                if (i <- match(matchThis, text, 0L)) {
                     writeLines(text[seq_len(i - 1L)], conn)
-                } else if (i <- match(TRUE, startsWith(text, "Package: ") & substring(text, 10L) > pkgname, 0L)) {
+                } else if (i <- match(TRUE, startsWith(text, "Package: ") & text > matchThis, 0L)) {
                     writeLines(text[seq_len(i - 1L)], conn)
+                    i <- i - 2L
                 } else {
                     i <- length(text)
                     writeLines(c(text, ""), conn)
                 }
-                write.dcf(packageInfo, conn, indent = 8L, width = 72L)
+                write.dcf(desc, conn, indent = 8L, width = 72L)
                 j <- which(text == "")
                 j <- j[j > i]
                 if (length(j) > 0) {
@@ -210,7 +212,7 @@ main <- function (args = this.path::progArgs())
                 }
             }, finally = close(conn))
         } else {
-            write.dcf(packageInfo, "./PACKAGES", indent = 8L, width = 72L)
+            write.dcf(desc, "./PACKAGES", indent = 8L, width = 72L)
         }
 
 
