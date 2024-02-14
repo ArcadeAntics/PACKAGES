@@ -1,7 +1,7 @@
 Package: this.path
-Version: 2.3.1.31
-Suggests: utils, jsonlite, microbenchmark
-Enhances: compiler, box, knitr, plumber, rprojroot, shiny, targets,
-        testthat
+Version: 2.3.1.32
+Depends: R (>= 2.15)
+Suggests: utils, jsonlite, microbenchmark, rprojroot
 License: MIT + file LICENSE
+Enhances: compiler, box, knitr, plumber, shiny, targets, testthat
 Archs: this.path.so.dSYM
