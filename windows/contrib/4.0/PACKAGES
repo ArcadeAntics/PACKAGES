@@ -1,6 +1,6 @@
-Package: this.path
-Version: 2.4.0.5
-Depends: R (>= 2.15.0)
-Suggests: utils, jsonlite, microbenchmark, rprojroot
+Package: essentials
+Version: 0.3.0.14
+Suggests: tools
 License: MIT + file LICENSE
-Enhances: compiler, box, knitr, plumber, shiny, targets, testthat
+Imports: graphics, grDevices, methods, utils, this.path
+Enhances: tcltk
