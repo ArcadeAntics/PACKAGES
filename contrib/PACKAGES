@@ -1,8 +1,8 @@
 Package: essentials
-Version: 0.3.0.15
+Version: 0.3.0.16
 Suggests: tools
 License: MIT + file LICENSE
-MD5sum: 43864ca6ea6a5b1207246e43fe2a2791
+MD5sum: 1b899eb08b4d50bb555f0921438ab2d9
 NeedsCompilation: yes
 Imports: graphics, grDevices, methods, utils, this.path
 Enhances: tcltk
