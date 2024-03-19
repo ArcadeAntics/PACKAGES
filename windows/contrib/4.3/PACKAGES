@@ -1,12 +1,12 @@
 Package: essentials
-Version: 0.3.0.14
+Version: 0.3.0.15
 Suggests: tools
 License: MIT + file LICENSE
 Imports: graphics, grDevices, methods, utils, this.path
 Enhances: tcltk
 
 Package: this.path
-Version: 2.4.0.5
+Version: 2.4.0.6
 Depends: R (>= 2.15.0)
 Suggests: utils, jsonlite, microbenchmark, rprojroot
 License: MIT + file LICENSE
