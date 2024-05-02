@@ -1,0 +1,6 @@
+Package: essentials
+Version: 0.3.0.24
+Suggests: tools
+License: MIT + file LICENSE
+Imports: graphics, grDevices, methods, utils, this.path
+Enhances: tcltk
