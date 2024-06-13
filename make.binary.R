@@ -173,8 +173,12 @@ main <- function (args = this.path::progArgs())
             on.exit(if (!failure) file.remove(files), add = TRUE, after = FALSE)
 
 
-        command <- shQuote(file.path(r$bin, if (.Platform$OS.type == "windows") "R.exe" else "R"))
-        command <- paste(command, "CMD", "INSTALL", "--build", shQuote(tar_path))
+        command <- if (.Platform$OS.type != "windows") {
+            shQuote(file.path(r$bin, "Rcmd.exe"))
+        } else {
+            paste(shQuote(file.path(r$bin, "R")), "CMD")
+        }
+        command <- paste(command, "INSTALL", "--build", shQuote(tar_path))
         cat("\n", command, "\n", sep = "")
         # unloadNamespace("essentials"); unloadNamespace("this.path"); stop("remove this later")
         res <- system(command)
