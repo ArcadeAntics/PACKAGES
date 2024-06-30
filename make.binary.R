@@ -106,6 +106,19 @@ main <- function (args = this.path::progArgs())
 
 
     build_binary <- function(pkg, r) {
+
+
+        if (.Platform$OS.type == "windows" && R_system_version(r$version) < "3.3.0") {
+            oPATH <- Sys.getenv("PATH", NA)
+            if (is.na(oPATH)) {
+                on.exit(Sys.unsetenv("PATH"), add = TRUE, after = FALSE)
+            } else {
+                on.exit(Sys.setenv(PATH = oPATH), add = TRUE, after = FALSE)
+            }
+            Sys.setenv(PATH = paste0("c:/Rtools/mingw_64/bin;", if (is.na(oPATH)) "" else oPATH))
+        }
+
+
         # dir.create(tmp_dir <- this.path::here(.. = 1, "tmp"), showWarnings = FALSE); setwd(tmp_dir); main_dir <- ".."; pkg <- "this.path"; r <- data.frame(bin = Sys.getenv("r_oldrel"), version = "4.2.3", major_minor = "4.2"); stop("remove this later")
         contrib_dir <- file.path("src", "contrib")
         info <- read.dcf(
@@ -173,7 +186,7 @@ main <- function (args = this.path::progArgs())
             on.exit(if (!failure) file.remove(files), add = TRUE, after = FALSE)
 
 
-        command <- if (.Platform$OS.type != "windows") {
+        command <- if (.Platform$OS.type == "windows") {
             shQuote(file.path(r$bin, "Rcmd.exe"))
         } else {
             paste(shQuote(file.path(r$bin, "R")), "CMD")
