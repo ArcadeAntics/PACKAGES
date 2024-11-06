@@ -1,8 +1,8 @@
 Package: essentials
-Version: 0.3.0.27
+Version: 0.3.0.28
 Suggests: tools, jsonlite
 License: MIT + file LICENSE
-MD5sum: 694b2630431ebcb4a00eccd70daf576e
+MD5sum: 3ca8a74f02b06ab8f0522be09b93228c
 NeedsCompilation: yes
 Imports: graphics, grDevices, methods, utils, this.path
 Enhances: tcltk
