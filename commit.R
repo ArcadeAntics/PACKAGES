@@ -27,7 +27,7 @@ local({
 
     for (branch in branches) {
         setwd(this.path::here(.. = 1, branch))
-        fun(sprintf("%s add *"         , git))
+        fun(sprintf("%s add ."         , git))
         fun(sprintf("%s commit -m %s"  , git, essentials::shEncode(paste("commit", structure(Sys.time(), tzone = "UTC")))))
         fun(sprintf("%s push origin %s", git, branch))
     }
