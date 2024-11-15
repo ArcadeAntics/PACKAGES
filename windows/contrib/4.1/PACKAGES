@@ -1,28 +1,28 @@
 Package: essentials
 Version: 0.3.0.28
-Suggests: tools, jsonlite
-License: MIT + file LICENSE
 Imports: graphics, grDevices, methods, utils, this.path
+Suggests: tools, jsonlite
 Enhances: tcltk
+License: MIT + file LICENSE
 
 Package: iris
 Version: 0.1.0
-License: MIT + file LICENSE
 Imports: methods
+License: MIT + file LICENSE
 
 Package: music.meta
 Version: 0.1.0
-License: MIT + file LICENSE
 Imports: essentials, methods, this.path
+License: MIT + file LICENSE
 
 Package: polynomial
 Version: 0.1.1
-License: MIT + file LICENSE
 Imports: essentials, graphics, grDevices, methods, stats
+License: MIT + file LICENSE
 
 Package: this.path
 Version: 2.5.0.77
 Depends: R (>= 2.15.0)
 Suggests: utils, jsonlite, microbenchmark, rprojroot
-License: MIT + file LICENSE
 Enhances: compiler, box, knitr, plumber, shiny, targets, testthat
+License: MIT + file LICENSE
