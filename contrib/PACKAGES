@@ -1,46 +1,46 @@
 Package: essentials
 Version: 0.3.0.28
+Imports: graphics, grDevices, methods, utils, this.path
 Suggests: tools, jsonlite
+Enhances: tcltk
 License: MIT + file LICENSE
 MD5sum: 3ca8a74f02b06ab8f0522be09b93228c
 NeedsCompilation: yes
-Imports: graphics, grDevices, methods, utils, this.path
-Enhances: tcltk
 
 Package: iris
 Version: 0.1.0
+Imports: methods
 License: MIT + file LICENSE
 MD5sum: b4570b78a4c30ce90c3dfea02212d208
 NeedsCompilation: no
-Imports: methods
 
 Package: module
 Version: 0.1.0
 Depends: R (>= 4.0)
+Imports: this.path
 License: MIT + file LICENSE
 MD5sum: 90304f9b63a1e7f55fdd625effc4e79e
 NeedsCompilation: yes
-Imports: this.path
 
 Package: music.meta
 Version: 0.1.0
+Imports: essentials, methods, this.path
 License: MIT + file LICENSE
 MD5sum: 32bd9437e9c048550035e64a6665a6b3
 NeedsCompilation: yes
-Imports: essentials, methods, this.path
 
 Package: polynomial
 Version: 0.1.1
+Imports: essentials, graphics, grDevices, methods, stats
 License: MIT + file LICENSE
 MD5sum: 891460cb9b01a3de8887f7f5af7c1c5d
 NeedsCompilation: yes
-Imports: essentials, graphics, grDevices, methods, stats
 
 Package: this.path
 Version: 2.5.0.77
 Depends: R (>= 2.15.0)
 Suggests: utils, jsonlite, microbenchmark, rprojroot
+Enhances: compiler, box, knitr, plumber, shiny, targets, testthat
 License: MIT + file LICENSE
 MD5sum: e4775ff0b4f479971ecbc6ad59ee56d2
 NeedsCompilation: yes
-Enhances: compiler, box, knitr, plumber, shiny, targets, testthat
