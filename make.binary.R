@@ -303,7 +303,7 @@ build_binary <- function (pkgname, repos_dir, R = NULL)
         return(FALSE)
     }
     binpath <- paste0(pkgname, "_", version, ext)
-    bin_dir <- file.path(repos_dir, "bin", platform, "contrib", r_major_minor)
+    bin_dir <- file.path("bin", platform, "contrib", r_major_minor)
 
 
     if (.Platform$OS.type == "windows") {
@@ -335,10 +335,11 @@ build_binary <- function (pkgname, repos_dir, R = NULL)
 }
 
 
-copy_binary_to_repos <- function (binpath, bin_dir)
+copy_binary_to_repos <- function (binpath, repos_dir, bin_dir)
 {
     binpath <- path.expand(binpath)
-    bin_dir <- path.expand(bin_dir)
+    repos_dir <- path.expand(repos_dir)
+    bin_dir <- file.path(repos_dir, bin_dir)
 
 
     if (endsWith(binpath, ".zip")) {
@@ -453,38 +454,55 @@ copy_binary_to_repos <- function (binpath, bin_dir)
 build_binary_in_repos <- function (pkgname, repos_dir, R = NULL)
 {
     x <- build_binary(pkgname, repos_dir, R)
-    binpath <- x$binpath
-    bin_dir <- x$bin_dir
-    copy_binary_to_repos(binpath, bin_dir)
+    copy_binary_to_repos(x$binpath, repos_dir, x$bin_dir)
 }
 
 
-repos <- "~/test"
-unlink(repos, recursive = TRUE, force = TRUE)
-dir.create(repos)
+make_repos <- function (repos_dir)
+{
+    repos_dir <- path.expand(repos_dir)
+    x <- list(
+        repos_dir = repos_dir,
+        copy_tarball = function (tarpath, Path = NULL)
+copy_tarball_to_repos(tarpath, repos_dir, Path),
+        build_tarball = function (pkgpath, Path = NULL, R = NULL)
+build_tarball_in_repos(pkgpath, repos_dir, Path, R),
+        copy_binary = function (binpath, bin_dir)
+copy_binary_to_repos(binpath, repos_dir, bin_dir),
+        build_binary = function (pkgname, R = NULL)
+build_binary_in_repos(pkgname, repos_dir, R = NULL)
+    )
+    class(x) <- "repos"
+    x
+}
 
 
-copy_tarball_to_repos("~/this.path/this.path_2.5.0.77.tar.gz", repos, Path = "4.5.0/Recommended")
+repos <- make_repos("~/test")
+unlink(repos$repos_dir, recursive = TRUE, force = TRUE)
+dir.create(repos$repos_dir)
 
 
-dir.create(file.path(repos, "bin", "windows", "contrib", "4.4"), showWarnings = FALSE, recursive = TRUE)
-file.create(file.path(repos, "bin", "windows", "contrib", "4.4", "this.path_2.5.0.76.zip"))
+repos$copy_tarball("~/this.path/this.path_2.5.0.77.tar.gz", "4.5.0/Recommended")
+
+
+dir.create(file.path(repos$repos_dir, "bin", "windows", "contrib", "4.4"), showWarnings = FALSE, recursive = TRUE)
+file.create(file.path(repos$repos_dir, "bin", "windows", "contrib", "4.4", "this.path_2.5.0.76.zip"))
 
 
 unloadNamespace("essentials"); unloadNamespace("this.path")
-build_binary_in_repos("this.path", repos)
+repos$build_binary("this.path")
 
 
-copy_binary_to_repos(
+repos$copy_binary(
     "~/PACKAGES/bin/macosx/big-sur-arm64/contrib/4.3/this.path_2.4.0.1.tgz",
-    file.path(repos, "bin/macosx/big-sur-arm64/contrib/4.3")
+    "bin/macosx/big-sur-arm64/contrib/4.3"
 )
 
 
-dir(repos, all.files = TRUE, recursive = TRUE, include.dirs = TRUE)
-write.dcf(read.dcf(file.path(repos, "src/contrib/PACKAGES"                         ), .src_fields))
-write.dcf(read.dcf(file.path(repos, "bin/windows/contrib/4.4/PACKAGES"             ), .bin_fields))
-write.dcf(read.dcf(file.path(repos, "bin/macosx/big-sur-arm64/contrib/4.3/PACKAGES"), .bin_fields))
+dir(repos$repos_dir, all.files = TRUE, recursive = TRUE, include.dirs = TRUE)
+write.dcf(read.dcf(file.path(repos$repos_dir, "src/contrib/PACKAGES"                         ), .src_fields))
+write.dcf(read.dcf(file.path(repos$repos_dir, "bin/windows/contrib/4.4/PACKAGES"             ), .bin_fields))
+write.dcf(read.dcf(file.path(repos$repos_dir, "bin/macosx/big-sur-arm64/contrib/4.3/PACKAGES"), .bin_fields))
 
 
 }
