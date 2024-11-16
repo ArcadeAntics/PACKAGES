@@ -18,6 +18,187 @@ if (FALSE) {
 )
 
 
+.read_DESCRIPTION_from_dir <- function (dir, ...)
+{
+    dir <- path.expand(dir)
+
+
+    desc <- read.dcf(file.path(dir, "DESCRIPTION"), ...)
+    if (nrow(desc) != 1L)
+        stop("contains a blank line", call. = FALSE)
+    structure(c(desc), names = colnames(desc))
+}
+
+
+.read_DESCRIPTION_from_tarball <- function (tarpath, ...)
+{
+    tarpath <- path.expand(tarpath)
+
+
+    files <- utils::untar(tarpath, list = TRUE)
+    files <- grep(
+        # sprintf("^%s/DESCRIPTION$", .standard_regexps()$valid_package_name),
+        # "^[[:alpha:]][[:alnum:].]*[[:alnum:]]/DESCRIPTION$",
+        "^[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz][0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.]*[0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz]/DESCRIPTION$",
+        files,
+        value = TRUE,
+        useBytes = TRUE
+    )
+    if (length(files) != 1L)
+        stop(gettextf("invalid '%s'", "tarpath"))
+    exdir <- tempfile("exdir", tempdir(TRUE))
+    tryCatch({
+        utils::untar(tarpath, files, exdir = exdir)
+        desc <- read.dcf(file = file.path(exdir, files), ...)
+    }, finally = {
+        unlink(exdir, recursive = TRUE, force = TRUE)
+    })
+    if (nrow(desc) != 1L)
+        stop("contains a blank line", call. = FALSE)
+    structure(c(desc), names = colnames(desc))
+}
+
+
+.read_DESCRIPTION_from_zip_archive <- function (zippath, ...)
+{
+    zippath <- path.expand(zippath)
+
+
+    files <- utils::unzip(zippath, list = TRUE)$Name
+    files <- grep(
+        # sprintf("^%s/DESCRIPTION$", .standard_regexps()$valid_package_name),
+        # "^[[:alpha:]][[:alnum:].]*[[:alnum:]]/DESCRIPTION$",
+        "^[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz][0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.]*[0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz]/DESCRIPTION$",
+        files,
+        value = TRUE,
+        useBytes = TRUE
+    )
+    if (length(files) != 1L)
+        stop(gettextf("invalid '%s'", "zippath"))
+    conn <- unz(zippath, files)
+    tryCatch({
+        desc <- read.dcf(file = conn, ...)
+    }, finally = {
+        close(conn)
+    })
+    if (nrow(desc) != 1L)
+        stop("contains a blank line", call. = FALSE)
+    structure(c(desc), names = colnames(desc))
+}
+
+
+.read_DESCRIPTION <- function (path)
+{
+    path <- path.expand(path)
+    if (dir.exists(path))
+        .read_DESCRIPTION_from_dir(path)
+    else if (endsWith(path, ".tar.gz"))
+        .read_DESCRIPTION_from_tarball(path)
+    else if (endsWith(path, ".zip"))
+        .read_DESCRIPTION_from_zip_archive(path)
+    else if (endsWith(path, ".tgz"))
+        .read_DESCRIPTION_from_tarball(path)
+    else stop(gettextf("invalid '%s' value", "path", domain = "R"), domain = NA)
+}
+
+
+.write_PACKAGES <- function (desc, dir)
+{
+    if (!is.character(desc))
+        stop("a character vector argument expected", domain = "R")
+    if (!length(desc) || is.null(fields <- names(desc)))
+        stop(gettextf("invalid '%s' argument", "desc", domain = "R"), domain = NA)
+
+
+    dir <- path.expand(dir)
+
+
+    PACKAGES_path <- file.path(dir, "PACKAGES")
+    if (file.exists(PACKAGES_path)) {
+        all_desc <- read.dcf(PACKAGES_path, fields)
+    } else {
+        all_desc <- matrix(
+            character(0),
+            nrow = 0L,
+            ncol = length(fields),
+            dimnames = list(NULL, fields)
+        )
+    }
+    if (i <- match(desc[["Package"]], all_desc[, "Package"], 0L)) {
+        all_desc[i, ] <- desc
+    } else {
+        all_desc <- rbind(all_desc, desc)
+    }
+    all_desc <- all_desc[order(all_desc[, "Package"]), , drop = FALSE]
+    tmpfile <- tempfile("PACKAGES")
+    on.exit(unlink(tmpfile), add = TRUE)
+    write.dcf(all_desc, tmpfile, indent = 8L, width = 72L)
+    if (!file.copy(tmpfile, PACKAGES_path, overwrite = TRUE, copy.date = TRUE))
+        stop(sprintf("unable to copy file '%s' to '%s'", tmpfile, PACKAGES_path))
+
+
+    PACKAGES_path
+}
+
+
+.find_R_CMD <- function (dir)
+{
+    if (.Platform$OS.type == "windows") {
+        if (file.exists(command <- file.path(dir, "Rcmd.exe")))
+            shQuote(command)
+        else if (file.exists(command <- file.path(dir, "x64/Rcmd.exe")))
+            shQuote(command)
+        else if (file.exists(command <- file.path(dir, "i386/Rcmd.exe")))
+            shQuote(command)
+        else c(shQuote(file.path(dir, "R.exe")), "CMD")
+    }
+    else c(shQuote(file.path(dir, "R")), "CMD")
+}
+
+
+.system <- function (command, intern = FALSE, ..., dry.run = FALSE, mustWork = NA,
+    quiet = intern)
+{
+    if (dry.run)
+        return(command)
+    if (!quiet)
+        cat("$ ", command, "\n", sep = "")
+    value <- system(command = command, intern = intern, ...)
+    if (intern) {
+        if (!is.null(status <- attr(value, "status")) && status) {
+            if (isFALSE(mustWork)) {
+                if (!quiet)
+                    cat("\nProcess finished with exit code ", status, "\n", sep = "")
+            }
+            else if (isTRUE(mustWork)) {
+                if (status == -1L)
+                    stop(gettextf("'%s' could not be run", command, domain = "R-base"), domain = NA)
+                else stop(gettextf("'%s' execution failed with error code %d", command, status, domain = "R-base"), domain = NA)
+            }
+            else if (status == -1L)
+                warning(gettextf("'%s' could not be run", command, domain = "R-base"), domain = NA)
+            else warning(gettextf("'%s' execution failed with error code %d", command, status, domain = "R-base"), domain = NA)
+        }
+        value
+    }
+    else {
+        if (!value || isFALSE(mustWork)) {
+            if (!quiet)
+                cat("\nProcess finished with exit code ", value, "\n", sep = "")
+        }
+        else if (isTRUE(mustWork)) {
+            if (value == -1L)
+                stop(gettextf("'%s' could not be run", command, domain = "R-base"), domain = NA)
+            else stop(gettextf("'%s' execution failed with error code %d", command, value, domain = "R-base"), domain = NA)
+        }
+        else if (value == -1L)
+            warning(gettextf("'%s' could not be run", command, domain = "R-base"), domain = NA)
+        else warning(gettextf("'%s' execution failed with error code %d", command, value, domain = "R-base"), domain = NA)
+        invisible(value)
+    }
+}
+
+
 make_R <- function (bin = NULL, version = NULL)
 {
     R_version_pattern <- "^(([[:digit:]]+)\\.([[:digit:]]+))\\.[[:digit:]]+$"
@@ -37,16 +218,7 @@ make_R <- function (bin = NULL, version = NULL)
             "-e", shQuote("writeLines(format(getRversion()))")
         )
         command <- paste(args, collapse = " ")
-        rval <- suppressWarnings(system(command, intern = TRUE))
-        if (!is.null(status <- attr(rval, "status")) && status) {
-            if (status == -1L)
-                warning(gettextf("'%s' could not be run",
-                    command, domain = "R-base"), domain = NA)
-            else
-                warning(gettextf("'%s' execution failed with error code %d",
-                    command, status, domain = "R-base"), domain = NA)
-            return(NA_character_)
-        }
+        rval <- .system(command, intern = TRUE, mustWork = TRUE)
         version <- if (is.character(rval) && length(rval) == 1L && !is.na(rval) &&
             grepl(R_version_pattern, rval))
         {
@@ -80,13 +252,7 @@ build_tarball <- function (pkgpath, R = NULL)
     r_version <- R$version
 
 
-    desc <- read.dcf(
-        file.path(pkgpath, "DESCRIPTION"),
-        fields = c("Package", "Version")
-    )
-    if (nrow(desc) != 1L)
-        stop("contains a blank line", call. = FALSE)
-    desc <- structure(c(desc), names = colnames(desc))
+    desc <- .read_DESCRIPTION_from_dir(pkgpath, c("Package", "Version"))
     pkgname <- desc[["Package"]]
     version <- desc[["Version"]]
     if (!grepl(pkgname, pattern = paste0("^(", .standard_regexps()$valid_package_name, ")$")))
@@ -96,27 +262,9 @@ build_tarball <- function (pkgpath, R = NULL)
 
 
     tarpath <- paste0(pkgname, "_", version, ".tar.gz")
-    if (.Platform$OS.type == "windows") {
-        command <- file.path(r_bin, "Rcmd.exe")
-        args <- if (file.exists(command))
-            shQuote(command)
-        else c(shQuote(file.path(r_bin, "R.exe")), "CMD")
-    } else {
-        args <- c(shQuote(file.path(r_bin, "R")), "CMD")
-    }
-    args <- c(args, "build", shQuote(pkgpath))
+    args <- c(.find_R_CMD(r_bin), "build", shQuote(pkgpath))
     command <- paste(args, collapse = " ")
-    cat("\n$ ", command, "\n", sep = "")
-    rval <- system(command)
-    if (!rval) {
-    }
-    else {
-        if (rval == -1L)
-            stop(gettextf("'%s' could not be run", ocommand),
-                domain = NA)
-        else stop(gettextf("'%s' execution failed with error code %d",
-            ocommand, value), domain = NA)
-    }
+    .system(command, mustWork = TRUE)
     tarpath
 }
 
@@ -144,58 +292,14 @@ copy_tarball_to_repos <- function (tarpath, repos_dir, Path = NULL)
     }
 
 
-    fields <- .src_fields
-
-
-    files <- utils::untar(tarpath, list = TRUE)
-    files <- grep("^[[:alpha:]][[:alnum:].]*[[:alnum:]]/DESCRIPTION$", files, value = TRUE)
-    if (length(files) != 1L)
-        stop(gettextf("invalid '%s'", "tarpath"))
-    exdir <- tempfile("exdir", tempdir(TRUE))
-    tryCatch({
-        utils::untar(tarpath, files, exdir = exdir)
-        desc <- read.dcf(
-            file.path(exdir, files),
-            fields
-        )
-    }, finally = {
-        unlink(exdir, recursive = TRUE, force = TRUE)
-    })
-    if (nrow(desc) != 1L)
-        stop("contains a blank line", call. = FALSE)
-    desc <- structure(c(desc), names = colnames(desc))
+    desc <- .read_DESCRIPTION_from_tarball(tarpath, .src_fields)
     desc["MD5sum"] <- tools::md5sum(tarpath)
     desc["Path"] <- Path
 
 
     src_contrib_dir <- file.path(repos_dir, "src", "contrib")
     dir.create(src_contrib_dir, showWarnings = FALSE, recursive = TRUE)
-    PACKAGES_path <- file.path(src_contrib_dir, "PACKAGES")
-    if (file.exists(PACKAGES_path)) {
-        all_desc <- read.dcf(PACKAGES_path, fields)
-    } else {
-        all_desc <- matrix(
-            character(0),
-            nrow = 0L,
-            ncol = length(fields),
-            dimnames = list(NULL, fields)
-        )
-    }
-    if (i <- match(desc[["Package"]], all_desc[, "Package"], 0L)) {
-        all_desc[i, ] <- desc
-    } else {
-        all_desc <- rbind(all_desc, desc)
-    }
-    all_desc <- all_desc[order(all_desc[, "Package"]), , drop = FALSE]
-    tmpfile <- tempfile("PACKAGES")
-    on.exit(unlink(tmpfile), add = TRUE)
-    write.dcf(all_desc, tmpfile, indent = 8L, width = 72L)
-    if (!file.copy(tmpfile, PACKAGES_path, overwrite = TRUE, copy.date = TRUE))
-        stop(sprintf(
-            "unable to rename file '%s' to '%s'",
-            tmpfile,
-            PACKAGES_path
-        ))
+    .write_PACKAGES(desc, src_contrib_dir)
 
 
     new_tarname <- paste0(desc[["Package"]], "_", desc[["Version"]], ".tar.gz")
@@ -254,25 +358,13 @@ build_tarball_in_repos <- function (pkgpath, repos_dir, Path = NULL, R = NULL)
 }
 
 
-build_binary <- function (pkgname, repos_dir, R = NULL)
+find_tarball_in_repos <- function (pkgname, repos_dir)
 {
     repos_dir <- path.expand(repos_dir)
 
 
-    if (is.null(R))
-        R <- make_R()
-    if (!inherits(R, "R"))
-        stop(gettextf("invalid '%s' value", "R", domain = "R"), domain = NA)
-    r_bin <- R$bin
-    r_version <- R$version
-    r_major_minor <- R$major_minor
-
-
     src_contrib_dir <- file.path(repos_dir, "src", "contrib")
-    info <- read.dcf(
-        file.path(src_contrib_dir, "PACKAGES"),
-        fields = .src_fields
-    )
+    info <- read.dcf(file.path(src_contrib_dir, "PACKAGES"), .src_fields)
     i <- match(pkgname, info[, "Package"])
     if (is.na(i)) {
         warning(sprintf("package '%s' does not exist in 'src/contrib/PACKAGES'", pkg))
@@ -290,6 +382,24 @@ build_binary <- function (pkgname, repos_dir, R = NULL)
     }
 
 
+    tarpath
+}
+
+
+build_binary <- function (tarpath, R = NULL)
+{
+    tarpath <- path.expand(tarpath)
+
+
+    if (is.null(R))
+        R <- make_R()
+    if (!inherits(R, "R"))
+        stop(gettextf("invalid '%s' value", "R", domain = "R"), domain = NA)
+    r_bin <- R$bin
+    r_version <- R$version
+    r_major_minor <- R$major_minor
+
+
     if (.Platform$OS.type == "windows") {
         ext <- ".zip"
         platform <- "windows"
@@ -298,40 +408,26 @@ build_binary <- function (pkgname, repos_dir, R = NULL)
         platform <- "macosx"
         if (startsWith(.Platform$pkgType, "mac.binary."))
             platform <- paste(platform, substring(.Platform$pkgType, 12L), sep = "/")
-    } else {
-        warning("binary packages are not available")
-        return(FALSE)
-    }
-    binpath <- paste0(pkgname, "_", version, ext)
+    } else stop("binary packages are not available")
+    desc <- .read_DESCRIPTION_from_tarball(tarpath)
+    binpath <- paste0(desc[["Package"]], "_", desc[["Version"]], ext)
     bin_dir <- file.path("bin", platform, "contrib", r_major_minor)
 
 
-    if (.Platform$OS.type == "windows") {
-        command <- file.path(r_bin, "Rcmd.exe")
-        args <- if (file.exists(command))
-            shQuote(command)
-        else c(shQuote(file.path(r_bin, "R.exe")), "CMD")
-    } else {
-        args <- c(shQuote(file.path(r_bin, "R")), "CMD")
-    }
-    args <- c(args, "INSTALL", "--build", shQuote(tarpath))
+    args <- c(.find_R_CMD(r_bin), "INSTALL", "--build", shQuote(tarpath))
     command <- paste(args, collapse = " ")
-    cat("\n$ ", command, "\n", sep = "")
     # unloadNamespace("essentials"); unloadNamespace("this.path"); stop("remove this later")
-    res <- system(command)
-    cat("\n")
-    if (res) {
-        if (res == -1L)
-            warning(gettextf("'%s' could not be run",
-                command, domain = "R-base"), domain = NA)
-        else
-            warning(gettextf("'%s' execution failed with error code %d",
-                command, res, domain = "R-base"), domain = NA)
-        return(FALSE)
-    }
+    .system(command, mustWork = TRUE)
 
 
     list(binpath = binpath, bin_dir = bin_dir)
+}
+
+
+build_binary_from_repos <- function (pkgname, repos_dir, R = NULL)
+{
+    tarpath <- find_tarball_in_repos(pkgname, repos_dir)
+    build_binary(tarpath, R)
 }
 
 
@@ -344,70 +440,20 @@ copy_binary_to_repos <- function (binpath, repos_dir, bin_dir)
 
     if (endsWith(binpath, ".zip")) {
         ext <- ".zip"
-        files <- utils::unzip(binpath, list = TRUE)$Name
-        files <- grep("^[[:alpha:]][[:alnum:].]*[[:alnum:]]/DESCRIPTION$", files, value = TRUE)
-        if (length(files) != 1L)
-            stop(gettextf("invalid '%s'", "binpath"))
-        conn <- unz(binpath, files)
-        tryCatch({
-            desc <- read.dcf(conn, .bin_fields)
-        }, finally = {
-            close(conn)
-        })
+        desc <- .read_DESCRIPTION_from_zip_archive(binpath, .bin_fields)
     } else if (endsWith(binpath, ".tgz")) {
         ext <- ".tgz"
-        files <- utils::untar(binpath, list = TRUE)
-        files <- grep("^[[:alpha:]][[:alnum:].]*[[:alnum:]]/DESCRIPTION$", files, value = TRUE)
-        if (length(files) != 1L)
-            stop(gettextf("invalid '%s'", "binpath"))
-        exdir <- tempfile("exdir", tempdir(TRUE))
-        tryCatch({
-            utils::untar(binpath, files, exdir = exdir)
-            desc <- read.dcf(
-                file.path(exdir, files),
-                .bin_fields
-            )
-        }, finally = {
-            unlink(exdir, recursive = TRUE, force = TRUE)
-        })
+        desc <- .read_DESCRIPTION_from_tarball(binpath, .bin_fields)
     } else {
         warning("invalid")
         return(FALSE)
     }
-    if (nrow(desc) != 1L)
-        stop("contains a blank line", call. = FALSE)
-    desc <- structure(c(desc), names = colnames(desc))
 
 
     dir.create(bin_dir, showWarnings = FALSE, recursive = TRUE)
 
 
-    PACKAGES_path <- file.path(bin_dir, "PACKAGES")
-    if (file.exists(PACKAGES_path)) {
-        all_desc <- read.dcf(PACKAGES_path, .bin_fields)
-    } else {
-        all_desc <- matrix(
-            character(0),
-            nrow = 0L,
-            ncol = length(.bin_fields),
-            dimnames = list(NULL, .bin_fields)
-        )
-    }
-    if (i <- match(desc[["Package"]], all_desc[, "Package"], 0L)) {
-        all_desc[i, ] <- desc
-    } else {
-        all_desc <- rbind(all_desc, desc)
-    }
-    all_desc <- all_desc[order(all_desc[, "Package"]), , drop = FALSE]
-    tmpfile <- tempfile("PACKAGES")
-    on.exit(unlink(tmpfile), add = TRUE)
-    write.dcf(all_desc, tmpfile, indent = 8L, width = 72L)
-    if (!file.copy(tmpfile, PACKAGES_path, overwrite = TRUE, copy.date = TRUE))
-        stop(sprintf(
-            "unable to rename file '%s' to '%s'",
-            tmpfile,
-            PACKAGES_path
-        ))
+    .write_PACKAGES(desc, bin_dir)
 
 
     binname <- paste0(
@@ -453,7 +499,7 @@ copy_binary_to_repos <- function (binpath, repos_dir, bin_dir)
 
 build_binary_in_repos <- function (pkgname, repos_dir, R = NULL)
 {
-    x <- build_binary(pkgname, repos_dir, R)
+    x <- build_binary_from_repos(pkgname, repos_dir, R)
     copy_binary_to_repos(x$binpath, repos_dir, x$bin_dir)
 }
 
@@ -467,6 +513,8 @@ make_repos <- function (repos_dir)
 copy_tarball_to_repos(tarpath, repos_dir, Path),
         build_tarball = function (pkgpath, Path = NULL, R = NULL)
 build_tarball_in_repos(pkgpath, repos_dir, Path, R),
+        find_tarball = function (pkgname)
+find_tarball_in_repos(pkgname, repos_dir),
         copy_binary = function (binpath, bin_dir)
 copy_binary_to_repos(binpath, repos_dir, bin_dir),
         build_binary = function (pkgname, R = NULL)
@@ -483,6 +531,9 @@ dir.create(repos$repos_dir)
 
 
 repos$copy_tarball("~/this.path/this.path_2.5.0.77.tar.gz", "4.5.0/Recommended")
+
+
+repos$find_tarball("this.path")
 
 
 dir.create(file.path(repos$repos_dir, "bin", "windows", "contrib", "4.4"), showWarnings = FALSE, recursive = TRUE)
