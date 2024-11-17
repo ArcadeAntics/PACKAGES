@@ -198,7 +198,7 @@ main <- function (args = this.path::progArgs())
                         )
                     else
                         i <- i & cmp(
-                            vapply(R, `[[`, 0L, "svn_revision"),
+                            vapply(R, `[[`, 0L, "svn_rev"),
                             depends[[2L]],
                             as.integer(depends[[4L]])
                         )

@@ -203,8 +203,36 @@ make_R <- function (bin = NULL, version = NULL)
         bin <- R.home("bin")
         version <- getRversion()
         major_minor <- sub(R_version_pattern, "\\1", version)
+        svn_rev <- R.version$`svn rev`
     }
-    else if (is.null(version)) {
+    else {
+        if (is.null(version)) {
+            args <- c(
+                shQuote(file.path(
+                    bin,
+                    if (.Platform$OS.type == "windows") "Rscript.exe" else "Rscript"
+                )),
+                "--default-packages=NULL",
+                "--vanilla",
+                "-e", shQuote("writeLines(format(getRversion()))")
+            )
+            command <- paste(args, collapse = " ")
+            rval <- .system(command, intern = TRUE, mustWork = TRUE)
+            version <- if (is.character(rval) && length(rval) == 1L && !is.na(rval) &&
+                    grepl(R_version_pattern, rval))
+            {
+                rval
+            }
+            else NA_character_
+            version <- R_system_version(version)
+            major_minor <- sub(R_version_pattern, "\\1", version)
+        }
+        else {
+            version <- package_version(version)
+            major_minor <- sub("^(([[:digit:]]+)\\.([[:digit:]]+)).*$", "\\1", version)
+        }
+
+
         args <- c(
             shQuote(file.path(
                 bin,
@@ -212,48 +240,23 @@ make_R <- function (bin = NULL, version = NULL)
             )),
             "--default-packages=NULL",
             "--vanilla",
-            "-e", shQuote("writeLines(format(getRversion()))")
+            "-e", shQuote("writeLines(R.version$`svn rev`)")
         )
         command <- paste(args, collapse = " ")
-        rval <- .system(command, intern = TRUE, mustWork = TRUE)
-        version <- if (is.character(rval) && length(rval) == 1L && !is.na(rval) &&
-            grepl(R_version_pattern, rval))
-        {
-            rval
-        }
-        else NA_character_
-        version <- R_system_version(version)
-        major_minor <- sub(R_version_pattern, "\\1", version)
-    }
-    else {
-        version <- package_version(version)
-        major_minor <- sub("^(([[:digit:]]+)\\.([[:digit:]]+)).*$", "\\1", version)
+        svn_rev <- .system(command, intern = TRUE, mustWork = TRUE)
     }
 
 
-    svn_revision <- tryCatch({
-        x <- bin
-        while (dirname(x) != x && basename(x) != "bin") {
-            x <- dirname(x)
-        }
-        if (dirname(x) == x || basename(x) != "bin")
-            stop()
-        x <- dirname(x)
-        conn <- file(file.path(x, "include", "Rversion.h"), "r", encoding = "native.enc")
-        on.exit(close(conn))
-        x <- readLines(conn, warn = FALSE, encoding = "bytes")
-        pattern <- "^[[:blank:]]*#[[:blank:]]*define[[:blank:]]+R_SVN_REVISION[[:blank:]]+(?:([[:digit:]]+)|\"([[:digit:]]+)\")[[:blank:]]*$"
-        m <- regexec(pattern, x)
-        keep <- which(lengths(m) == 3L)
-        x <- regmatches(x[keep], m[keep])[[1L]]
-        as.integer(if (nzchar(x[[2L]])) x[[2L]] else x[[3L]])
-    }, error = function(e) {
-        NA_integer_
-    })
+    svn_rev <- if (is.character(svn_rev) && length(svn_rev) == 1L && !is.na(svn_rev) &&
+        grepl("^[[:digit:]]+$", svn_rev))
+    {
+        as.integer(svn_rev)
+    }
+    else NA_integer_
 
 
     structure(
-        list(bin = bin, version = version, major_minor = major_minor, svn_revision = svn_revision),
+        list(bin = bin, version = version, major_minor = major_minor, svn_rev = svn_rev),
         class = "R"
     )
 }
