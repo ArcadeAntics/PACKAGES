@@ -61,7 +61,7 @@ main <- function (args = this.path::progArgs())
     pattern <- "^[[:blank:]]*([[:alpha:]][[:alnum:].]*[[:alnum:]])(?:[[:blank:]]*\\([[:blank:]]*R[[:blank:]]*(<|>|<=|>=|==)[[:blank:]]*([[:digit:]]+\\.[[:digit:]]+)\\))?[[:blank:]]*$"
     m <- regexec(pattern, args)
     if (!all(lengths(m) == 4L))
-        stop("invalid arguments, must be of the form \"<pkgname> (R <op> <version>)\" where\n pkgname is the name of the package\n op is the comparison operator, < or > or <= or >= or ==\n version is the R version of the form major.minor\n\n the parenthesized portion is optional, and if it is not included,\n the package will be built for all R versions")
+        stop("invalid arguments, must be package names each optionally followed\n by a comment in parentheses specifying an R version requirement\n that is \"<pkgname> (R <op> <version>)\" i.e. \"this.path (R >= 4.0)\"")
     args <- regmatches(args, m)
     args <- lapply(args, function(args) {
         args <- args[-1L]
@@ -207,7 +207,7 @@ main <- function (args = this.path::progArgs())
             names(i) <- names(R)
             i
         })
-        for (r in R[i]) {
+        for (r in R[which(i)]) {
             cat("\n", "Building package:", argsi$pkgname, " binary for R ", format(r$version), "\n", sep = "")
             x <- withVisible(
                 tryCatch({
