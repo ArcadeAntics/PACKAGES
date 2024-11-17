@@ -3,29 +3,16 @@ if (FALSE) {
 
 sourcelike <- function (file)
 {
-    ofile <- file
-    filename <- this.path::set.sys.path(
-        file,
-        path.only = TRUE,
-        ignore.all = TRUE,
-        Function = "sourcelike"
-    )
-    lines <- readLines(filename, warn = FALSE)
-    timestamp <- file.mtime(filename)[1]
-    srcfile <- srcfilecopy(filename, lines, timestamp, isFile = TRUE)
-    this.path::set.src.path(srcfile)
+    filename <- normalizePath(file, "/", TRUE)
     envir <- new.env(hash = TRUE, parent = .BaseNamespaceEnv)
     envir$.packageName <- filename
-    oopt <- options(topLevelEnvironment = envir)
-    on.exit(options(oopt))
-    this.path::set.env.path(envir)
-    exprs <- parse(text = lines, srcfile = srcfile, keep.source = FALSE)
+    exprs <- parse(filename, n = -1L, keep.source = TRUE)
     eval(exprs, envir)
     envir
 }
 
 
-repos_R <- sourcelike(this.path::here("repos.R"))
+repos_R <- sourcelike("~/PACKAGES/src/repos.R")
 repos <- repos_R$make_repos("~/test")
 unlink(repos$repos_dir, recursive = TRUE, force = TRUE)
 dir.create(repos$repos_dir)
@@ -63,12 +50,33 @@ write.dcf(read.dcf(file.path(repos$repos_dir, "bin/macosx/big-sur-arm64/contrib/
 main <- function (args = this.path::progArgs())
 {
     # args <- "this.path"; stop("remove this later")
+    # args <- c("this.path (R == 4.4)", "essentials (R >= 4.0)", "iris "); stop("remove this later")
     if (length(args) <= 0L) {
         if (interactive())
-            args <- strsplit(readline("Packages to build binaries: "), "[[:blank:]]+")[[1L]]
+            args <- strsplit(readline("Packages to build binaries: "), ",")[[1L]]
         else stop("must provide arguments or be in interactive mode")
         if (length(args) <= 0L)
             stop("expected at least 1 argument")
+    }
+    pattern <- "^[[:blank:]]*([[:alpha:]][[:alnum:].]*[[:alnum:]])(?:[[:blank:]]*\\([[:blank:]]*R[[:blank:]]*(<|>|<=|>=|==)[[:blank:]]*([[:digit:]]+\\.[[:digit:]]+)\\))?[[:blank:]]*$"
+    m <- regexec(pattern, args)
+    if (!all(lengths(m) == 4L))
+        stop("invalid arguments, must be of the form \"<pkgname> (R <op> <version>)\" where\n pkgname is the name of the package\n op is the comparison operator, < or > or <= or >= or ==\n version is the R version of the form major.minor\n\n the parenthesized portion is optional, and if it is not included,\n the package will be built for all R versions")
+    args <- regmatches(args, m)
+    args <- lapply(args, function(args) {
+        args <- args[-1L]
+        args <- as.list(args)
+        names(args) <- c("pkgname", "op", "version")
+        args
+    })
+    cmp <- function(e1, op, e2) {
+        op <- switch(op, `<` = `<`, `>` = `>`, `<=` = `<=`, `>=` = `>=`, `==` = `==`, NULL)
+        if (is.null(op)) {
+            if (!length(e1) || !length(e2))
+                return(logical())
+            rep(TRUE, max(length(e1), length(e2)))
+        }
+        else op(e1, e2)
     }
 
 
@@ -77,7 +85,40 @@ main <- function (args = this.path::progArgs())
     loadNamespace("this.path")
 
 
-    R <- data.frame(bin = local({
+    owd <- getwd()
+    if (is.null(owd))
+        warning("cannot 'chdir' as current directory is unknown")
+
+
+    main_dir <- this.path::here(.. = 1)
+    tmp_dir <- this.path::path.join(main_dir, "tmp")
+    unlink(tmp_dir, recursive = TRUE, force = TRUE, expand = FALSE)
+    dir.create(tmp_dir, showWarnings = FALSE)
+    on.exit({
+        ## must change back to original directory before attempting to unlink
+        ## temporary directory
+        setwd(owd)
+        unlink(tmp_dir, recursive = TRUE, force = TRUE, expand = FALSE)
+    }, add = TRUE, after = FALSE)
+    setwd(tmp_dir)
+    main_dir <- ".."
+
+
+    sourcelike <- function(file) {
+        filename <- normalizePath(file, "/", TRUE)
+        envir <- new.env(hash = TRUE, parent = .BaseNamespaceEnv)
+        envir$.packageName <- filename
+        exprs <- parse(filename, n = -1L, keep.source = TRUE)
+        eval(exprs, envir)
+        envir
+    }
+
+
+    repos_R <- sourcelike(file.path(main_dir, "src", "repos.R"))
+    repos <- repos_R$make_repos(main_dir)
+
+
+    R <- local({
         x <- Sys.getenv(c("r_release", "r_oldrel"), NA)
         if (any(i <- is.na(x))) {
             warning(sprintf(
@@ -108,226 +149,25 @@ main <- function (args = this.path::progArgs())
         z <- vapply(z, function(zz) as.integer(zz[-1L]), integer(2), USE.NAMES = FALSE)
         y <- y[order(z[1L, ], z[2L, ], decreasing = TRUE)]
         x <- c(x, y)
-        if (length(x)) x else R.home("bin")
-    }))
-
-
-    R_version_pattern <- "^(([[:digit:]]+)\\.([[:digit:]]+))\\.[[:digit:]]+$"
-    R$version <- vapply(R$bin, function(xx) {
-        apt <- if (.Platform$OS.type == "windows") "Rscript.exe" else "Rscript"
-        apt <- this.path::path.join(xx, apt)
-        args <- c(apt, "--default-packages=NULL", "--vanilla", "-e", "writeLines(format(getRversion()))")
-        command <- paste(shQuote(args), collapse = " ")
-        rval <- suppressWarnings(system(command, intern = TRUE))
-        if (!is.null(status <- attr(rval, "status")) && status) {
-            if (status == -1L)
-                warning(gettextf("'%s' could not be run",
-                    command, domain = "R-base"), domain = NA)
-            else
-                warning(gettextf("'%s' execution failed with error code %d",
-                    command, status, domain = "R-base"), domain = NA)
-            return(NA_character_)
-        }
-        if (is.character(rval) && length(rval) == 1L && !is.na(rval) &&
-            grepl(R_version_pattern, rval))
-        {
-            rval
-        }
-        else NA_character_
-    }, "")
-    R$major_minor <- sub(R_version_pattern, "\\1", R$version)
-    R <- do.call("rbind", lapply(
-        split(R, factor(R$major_minor, unique(R$major_minor))),
-        function(r) {
-            n <- nrow(r)
+        if (length(x)) x else list(NULL)
+    })
+    R <- lapply(R, repos_R$make_R)
+    R <- local({
+        f <- vapply(R, `[[`, "", "major_minor")
+        f <- factor(f, unique(f))
+        lapply(split(R, f), function(r) {
+            n <- length(r)
             if (n == 1L)
-               r
-            else
-                r[order(r$version)[n], , drop = FALSE]
-        }
-    ))
-
-
-    owd <- getwd()
-    if (is.null(owd))
-        warning("cannot 'chdir' as current directory is unknown")
-
-
-    main_dir <- this.path::here(.. = 1)
-    tmp_dir <- this.path::path.join(main_dir, "tmp")
-    unlink(tmp_dir, recursive = TRUE, force = TRUE, expand = FALSE)
-    dir.create(tmp_dir, showWarnings = FALSE)
-    on.exit({
-        ## must change back to original directory before attempting to unlink
-        ## temporary directory
-        setwd(owd)
-        unlink(tmp_dir, recursive = TRUE, force = TRUE, expand = FALSE)
-    }, add = TRUE, after = FALSE)
-    setwd(tmp_dir)
-    main_dir <- ".."
-
-
-    build_binary <- function(pkg, r) {
-        # dir.create(tmp_dir <- this.path::here(.. = 1, "tmp"), showWarnings = FALSE); setwd(tmp_dir); main_dir <- ".."; pkg <- "this.path"; r <- data.frame(bin = Sys.getenv("r_oldrel"), version = "4.2.3", major_minor = "4.2"); stop("remove this later")
-        contrib_dir <- file.path("src", "contrib")
-        info <- read.dcf(
-            file.path(main_dir, contrib_dir, "PACKAGES"),
-            fields = c("Package", "Version")
-        )
-        i <- match(pkg, info[, "Package"])
-        if (is.na(i)) {
-            warning(sprintf("package '%s' does not exist in '/%s/PACKAGES'", pkg, contrib_dir))
-            return(FALSE)
-        }
-        pkgname <- info[[i, "Package"]]
-        version <- info[[i, "Version"]]
-        tar_file <- paste0(pkgname, "_", version, ".tar.gz")
-        tar_path <- file.path(main_dir, contrib_dir, tar_file)
-        if (!file.exists(tar_path)) {
-            warning(sprintf("tarball '/%s/%s' was not found", contrib_dir, tar_file))
-            return(FALSE)
-        }
-
-
-        if (.Platform$OS.type == "windows") {
-            ext <- ".zip"
-            platform <- "windows"
-        } else if (grepl("^darwin", R.version$os)) {
-            ext <- ".tgz"
-            platform <- "macosx"
-            if (startsWith(.Platform$pkgType, "mac.binary."))
-                platform <- paste(platform, substring(.Platform$pkgType, 12L), sep = "/")
-        } else {
-            warning("binary packages are not available")
-            return(FALSE)
-        }
-        bin_file <- paste0(pkgname, "_", version, ext)
-        bin_dir <- file.path("bin", platform, "contrib", r$major_minor)
-        bin_path <- file.path(main_dir, bin_dir)
-        dir.create(bin_path, showWarnings = FALSE, recursive = TRUE)
-
-
-        exdir <- tempfile("dir")
-        utils::untar(tar_path, DESCRIPTION_file <- file.path(pkgname, "DESCRIPTION"), exdir = exdir)
-        desc <- read.dcf(file.path(exdir, DESCRIPTION_file))
-        unlink(exdir, recursive = TRUE, force = TRUE)
-        if (nrow(desc) != 1L) {
-            warning("bruh wtf are you doing???")
-            return(FALSE)
-        }
-        desc <- structure(c(desc), names = colnames(desc))
-
-
-        fields <- c("Package", "Version", "Depends", "Suggests",
-            "License", "Imports", "LinkingTo", "Enhances", "OS_type")
-        desc <- structure(desc[fields], names = fields)
-        desc <- t(desc)
-
-
-        failure <- TRUE
-
-
-        files <- list.files(file.path(main_dir, bin_dir), full.names = TRUE)
-        files <- files[startsWith(basename(files), paste0(pkgname, "_"))]
-        files <- files[endsWith(basename(files), ext)]
-        files <- files[basename(files) != bin_file]
-        if (length(files))
-            on.exit(if (!failure) file.remove(files), add = TRUE, after = FALSE)
-
-
-        command <- if (.Platform$OS.type == "windows") {
-            shQuote(file.path(r$bin, "Rcmd.exe"))
-        } else {
-            paste(shQuote(file.path(r$bin, "R")), "CMD")
-        }
-        command <- paste(command, "INSTALL", "--build", shQuote(tar_path))
-        cat("\n", command, "\n", sep = "")
-        # unloadNamespace("essentials"); unloadNamespace("this.path"); stop("remove this later")
-        res <- system(command)
-        cat("\n")
-        if (res) {
-            if (res == -1L)
-                warning(gettextf("'%s' could not be run",
-                    command, domain = "R-base"), domain = NA)
-            else
-                warning(gettextf("'%s' execution failed with error code %d",
-                    command, res, domain = "R-base"), domain = NA)
-            return(FALSE)
-        }
-        PACKAGES_path <- file.path(bin_path, "PACKAGES")
-        if (file.exists(PACKAGES_path)) {
-            text <- readLines(PACKAGES_path)
-            conn <- file("./PACKAGES", "w")
-            tryCatch({
-                matchThis <- paste0("Package: ", pkgname)
-                if (i <- match(matchThis, text, 0L)) {
-                    writeLines(text[seq_len(i - 1L)], conn)
-                } else if (i <- match(TRUE, startsWith(text, "Package: ") & text > matchThis, 0L)) {
-                    writeLines(text[seq_len(i - 1L)], conn)
-                    i <- i - 2L
-                } else {
-                    i <- length(text)
-                    writeLines(c(text, ""), conn)
-                }
-                write.dcf(desc, conn, indent = 8L, width = 72L)
-                j <- which(text == "")
-                j <- j[j > i]
-                if (length(j) > 0) {
-                    j <- j[[1L]]
-                    writeLines(text[j:length(text)], conn)
-                }
-            }, finally = close(conn))
-        } else {
-            write.dcf(desc, "./PACKAGES", indent = 8L, width = 72L)
-        }
-
-
-        rename_these <- c("PACKAGES", bin_file)
-        failure <- !all(file.rename(
-            file.path(".", rename_these),
-            file.path(bin_path, rename_these)
-        ))
-        return(!failure)
-    }
-
-
-    build_binaries <- function(pkgs, r) {
-        vapply(pkgs, build_binary, r, FUN.VALUE = NA)
-    }
+                r[[1L]]
+            else r[[order(do.call("c", lapply(R, `[[`, "version")))[n]]]
+        })
+    })
 
 
     all_pkgs <- read.dcf(
         file.path(main_dir, "src", "contrib", "PACKAGES"),
         fields = "Package"
     )
-
-
-    args_sep <- "/"
-    argslist <- vector("list", sum(args == args_sep) + 1L)
-    indx <- 0L
-    while (i <- match(args_sep, args, 0L)) {
-        argslist[[indx <- indx + 1L]] <- args[seq_len(i - 1L)]
-        args <- args[-seq_len(i)]
-    }
-    argslist[[indx + 1L]] <- args
-    argslist <- argslist[lengths(argslist) >= 1L]
-    argslist <- lapply(argslist, function(args) {
-        m <- regexec("^--version=(.*)$", args)
-        keep <- (lengths(m) > 1L)
-        pkgs <- args[!keep]
-        if ("--all" %in% pkgs)
-            pkgs <- setdiff(all_pkgs, pkgs)
-        args <- args[keep]
-        m <- m[keep]
-        args <- regmatches(args, m)
-        args <- vapply(args, `[`, 2L, FUN.VALUE = "")
-        args <- strsplit(args, "[[:blank:]]+|[[:blank:]]*[,;][[:blank:]]*")
-        args <- unlist(args)
-        args <- if (!length(args) || "all" %in% args)
-            seq_len(nrow(R))
-        else which(R$major_minor %in% args)
-        list(pkgs = pkgs, R_indx = args)
-    })
 
 
     unloadNamespace("this.path")
@@ -339,11 +179,43 @@ main <- function (args = this.path::progArgs())
     Sys.unsetenv(names(e))
 
 
-    for (args in argslist) {
-        for (i in args$R_indx) {
-            r <- R[i, , drop = TRUE]
-            cat("\n", "Building binaries for R ", r$version, "\n", sep = "")
-            print(tryCatch(build_binaries(args$pkgs, r), error = identity))
+    for (argsi in args) {
+        i <- local({
+            i <- cmp(vapply(R, `[[`, "", "major_minor"), argsi$op, argsi$version)
+            tarpath <- repos$find_tarball(argsi$pkgname)
+            depends <- repos_R$.read_DESCRIPTION_from_tarball(tarpath, "Depends")
+            depends <- strsplit(depends, ",", fixed = TRUE)[[1L]]
+            pattern <- "^[[:blank:]]*R[[:blank:]]*\\([[:blank:]]*(<|>|<=|>=|==)[[:blank:]]*(?:((?:[[:digit:]]+[.-])*[[:digit:]]+)|r([[:digit:]]+))[[:blank:]]*\\)[[:blank:]]*$"
+            m <- regexec(pattern, depends)
+            if (any(keep <- lengths(m) == 4L)) {
+                depends <- regmatches(depends[keep], m[keep])
+                for (depends in depends) {
+                    if (nzchar(depends[[3L]]))
+                        i <- i & cmp(
+                            do.call("c", lapply(R, `[[`, "version")),
+                            depends[[2L]],
+                            depends[[3L]]
+                        )
+                    else
+                        i <- i & cmp(
+                            vapply(R, `[[`, 0L, "svn_revision"),
+                            depends[[2L]],
+                            as.integer(depends[[4L]])
+                        )
+                }
+            }
+            names(i) <- names(R)
+            i
+        })
+        for (r in R[i]) {
+            cat("\n", "Building package:", argsi$pkgname, " binary for R ", format(r$version), "\n", sep = "")
+            x <- withVisible(
+                tryCatch({
+                    invisible(repos$build_binary(argsi$pkgname, r))
+                }, error = identity)
+            )
+            if (x$visible)
+                print(x$value)
             cat("\n")
         }
     }
