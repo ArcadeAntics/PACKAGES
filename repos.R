@@ -229,8 +229,31 @@ make_R <- function (bin = NULL, version = NULL)
         version <- package_version(version)
         major_minor <- sub("^(([[:digit:]]+)\\.([[:digit:]]+)).*$", "\\1", version)
     }
+
+
+    svn_revision <- tryCatch({
+        x <- bin
+        while (dirname(x) != x && basename(x) != "bin") {
+            x <- dirname(x)
+        }
+        if (dirname(x) == x || basename(x) != "bin")
+            stop()
+        x <- dirname(x)
+        conn <- file(file.path(x, "include", "Rversion.h"), "r", encoding = "native.enc")
+        on.exit(close(conn))
+        x <- readLines(conn, warn = FALSE, encoding = "bytes")
+        pattern <- "^[[:blank:]]*#[[:blank:]]*define[[:blank:]]+R_SVN_REVISION[[:blank:]]+(?:([[:digit:]]+)|\"([[:digit:]]+)\")[[:blank:]]*$"
+        m <- regexec(pattern, x)
+        keep <- which(lengths(m) == 3L)
+        x <- regmatches(x[keep], m[keep])[[1L]]
+        as.integer(if (nzchar(x[[2L]])) x[[2L]] else x[[3L]])
+    }, error = function(e) {
+        NA_integer_
+    })
+
+
     structure(
-        list(bin = bin, version = version, major_minor = major_minor),
+        list(bin = bin, version = version, major_minor = major_minor, svn_revision = svn_revision),
         class = "R"
     )
 }
