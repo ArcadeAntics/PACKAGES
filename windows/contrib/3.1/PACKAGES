@@ -1,6 +1,7 @@
 Package: this.path
-Version: 2.5.0.77
-Depends: R (>= 2.15.0)
+Version: 2.5.0.78
+Depends: R (>= 2.15)
 Suggests: utils, jsonlite, microbenchmark, rprojroot
 Enhances: compiler, box, knitr, plumber, shiny, targets, testthat
 License: MIT + file LICENSE
+Archs: x64
