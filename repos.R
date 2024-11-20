@@ -238,17 +238,35 @@ make_R <- function (bin = NULL)
 }
 
 
+as_R <- function (x, ...)
+{
+    if (missing(x) || is.null(x))
+        return(make_R())
+    UseMethod("as_R")
+}
+
+
+as_R.R <- function (x, ...)
+x
+registerS3method("as_R", "R", "as_R.R")
+
+
+as_R.default <- function (x, ...)
+{
+    if (!is.null(x) && !is.character(x))
+        stop(gettextf("invalid '%s' argument", "x", domain = "R"), domain = NA)
+    make_R(x)
+}
+registerS3method("as_R", "default", "as_R.default")
+
+
 build_tarball <- function (pkgpath, R = NULL)
 {
     pkgpath <- path.expand(pkgpath)
 
 
-    if (is.null(R))
-        R <- make_R()
-    if (!inherits(R, "R"))
-        stop(gettextf("invalid '%s' value", "R", domain = "R"), domain = NA)
+    R <- as_R(R)
     r_bin <- R$bin
-    r_version <- R$version
 
 
     desc <- .read_DESCRIPTION_from_dir(pkgpath, c("Package", "Version"))
@@ -390,12 +408,8 @@ build_binary <- function (tarpath, R = NULL)
     tarpath <- path.expand(tarpath)
 
 
-    if (is.null(R))
-        R <- make_R()
-    if (!inherits(R, "R"))
-        stop(gettextf("invalid '%s' value", "R", domain = "R"), domain = NA)
+    R <- as_R(R)
     r_bin <- R$bin
-    r_version <- R$version
     r_major_minor <- R$major_minor
 
 
@@ -517,7 +531,7 @@ find_tarball_in_repos(pkgname, repos_dir),
         copy_binary = function (binpath, bin_dir)
 copy_binary_to_repos(binpath, repos_dir, bin_dir),
         build_binary = function (pkgname, R = NULL)
-build_binary_in_repos(pkgname, repos_dir, R = NULL)
+build_binary_in_repos(pkgname, repos_dir, R)
     )
     class(x) <- "repos"
     x
