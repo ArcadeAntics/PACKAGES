@@ -1,3 +1,39 @@
+#' DCF Fields in PACKAGES Files
+#'
+#' @aliases .src_fields .bin_fields
+#'
+#' @description
+#' \code{.src_fields} is a character vector, the names of the fields of a source
+#' type \file{PACKAGES} file.
+#'
+#' \code{.bin_fields} is a character vector, the names of the fields of a binary
+#' type \file{PACKAGES} file.
+#'
+#' @usage .src_fields
+#' @usage .bin_fields
+#'
+#' @format NULL
+#'
+#' @details
+#' This is used in combination with \code{\link{read.dcf}()}.
+#'
+#' @section Value:
+#' \verb{> .src_fields
+#'  [1] Package               Version               Priority
+#'  [4] Depends               Imports               LinkingTo
+#'  [7] Suggests              Enhances              License
+#' [10] License_is_FOSS       License_restricts_use OS_type
+#' [13] Archs                 MD5sum                NeedsCompilation
+#' [16] Path}
+#'
+#' \verb{> .bin_fields
+#'  [1] Package               Version               Priority
+#'  [4] Depends               Imports               LinkingTo
+#'  [7] Suggests              Enhances              License
+#' [10] License_is_FOSS       License_restricts_use OS_type
+#' [13] Archs}
+#'
+#' @export
 .src_fields <- c(
     "Package", "Version", "Priority", "Depends",
     "Imports", "LinkingTo", "Suggests", "Enhances",
@@ -7,6 +43,7 @@
 )
 
 
+#' @export
 .bin_fields <- c(
     "Package", "Version", "Priority", "Depends",
     "Imports", "LinkingTo", "Suggests", "Enhances",
@@ -15,6 +52,50 @@
 )
 
 
+#' Read DESCRIPTION of Package
+#'
+#' @name .read_DESCRIPTION
+#'
+#' @aliases .read_DESCRIPTION_from_dir .read_DESCRIPTION_from_tarball .read_DESCRIPTION_from_zip_archive .read_DESCRIPTION
+#'
+#' @description
+#' Reads the contents of a \file{DESCRIPTION} file.
+#'
+#' @usage .read_DESCRIPTION_from_dir(dir, \dots)
+#' @usage .read_DESCRIPTION_from_tarball(tarpath, \dots)
+#' @usage .read_DESCRIPTION_from_zip_archive(zippath, \dots)
+#' @usage .read_DESCRIPTION(path, \dots)
+#'
+#' @param dir character string; path of the package directory.
+#' @param tarpath character string; path of the package tarball.
+#' @param zippath character string; path of the package zip archive.
+#' @param path character string; path of the package in one of the previous formats.
+#' @param \dots further arguments passed to \code{\link{read.dcf}()}.
+#'
+#' @details
+#' \code{.read_DESCRIPTION()} will guess the format of the package in the
+#' following manner:
+#'
+#' \enumerate{
+#'   \item{If \code{path} is an existing directory, invokes
+#'     \code{.read_DESCRIPTION_from_dir()}.}
+#'
+#'   \item{If \code{path} ends with \code{".tar.gz"}, invokes
+#'     \code{.read_DESCRIPTION_from_tarball()}.}
+#'
+#'   \item{If \code{path} ends with \code{".zip"}, invokes
+#'     \code{.read_DESCRIPTION_from_zip_archive()}.}
+#'
+#'   \item{If \code{path} ends with \code{".tgz"}, invokes
+#'     \code{.read_DESCRIPTION_from_tarball()}.}
+#'
+#'   \item{Otherwise, throws an error.}
+#' }
+#'
+#' @section Value:
+#' named character vector.
+#'
+#' @export
 .read_DESCRIPTION_from_dir <- function (dir, ...)
 {
     dir <- path.expand(dir)
@@ -27,6 +108,7 @@
 }
 
 
+#' @export
 .read_DESCRIPTION_from_tarball <- function (tarpath, ...)
 {
     tarpath <- path.expand(tarpath)
@@ -56,6 +138,7 @@
 }
 
 
+#' @export
 .read_DESCRIPTION_from_zip_archive <- function (zippath, ...)
 {
     zippath <- path.expand(zippath)
@@ -84,21 +167,42 @@
 }
 
 
-.read_DESCRIPTION <- function (path)
+#' @export
+.read_DESCRIPTION <- function (path, ...)
 {
     path <- path.expand(path)
     if (dir.exists(path))
-        .read_DESCRIPTION_from_dir(path)
+        .read_DESCRIPTION_from_dir(dir = path, ...)
     else if (endsWith(path, ".tar.gz"))
-        .read_DESCRIPTION_from_tarball(path)
+        .read_DESCRIPTION_from_tarball(tarpath = path, ...)
     else if (endsWith(path, ".zip"))
-        .read_DESCRIPTION_from_zip_archive(path)
+        .read_DESCRIPTION_from_zip_archive(zippath = path, ...)
     else if (endsWith(path, ".tgz"))
-        .read_DESCRIPTION_from_tarball(path)
+        .read_DESCRIPTION_from_tarball(tarpath = path, ...)
     else stop(gettextf("invalid '%s' value", "path", domain = "R"), domain = NA)
 }
 
 
+#' Write PACKAGES File
+#'
+#' @description
+#' Writes a package's \file{DESCRIPTION} fields to a \file{PACKAGES} file.
+#'
+#' @usage .write_PACKAGES(desc, dir)
+#'
+#' @param desc named character vector; contents of the package's
+#'   \file{DESCRIPTION} file.
+#' @param dir character string; directory in which to write the \file{PACKAGES}
+#'   file.
+#'
+#' @details
+#' If \file{PACKAGES} already exists in \code{dir}, \code{.write_PACKAGES()} will
+#' append or overwrite the record in the database.
+#'
+#' @section Value:
+#' character string; path of the \file{PACKAGES} file.
+#'
+#' @export
 .write_PACKAGES <- function (desc, dir)
 {
     if (!is.character(desc))
@@ -138,6 +242,27 @@
 }
 
 
+#' Find R CMD Executable
+#'
+#' @description
+#' Finds the relevant executable and quotes the strings to be passed to an
+#' operating system shell.
+#'
+#' @usage .find_R_CMD(dir)
+#'
+#' @param dir character string; \code{"bin"} component of the \R home directory.
+#'
+#' @details
+#' This is mostly desirable on Windows where invoking \command{R CMD} does not
+#' support a UNC path as the working directory.
+#'
+#' @section Value:
+#' character vector.
+#'
+#' @examples
+#' .find_R_CMD(R.home("bin"))
+#'
+#' @export
 .find_R_CMD <- function (dir)
 {
     if (.Platform$OS.type == "windows") {
@@ -153,6 +278,32 @@
 }
 
 
+#' Invoke a System Command
+#'
+#' @description
+#' Invoke the OS command specified by \code{command}.
+#'
+#' @usage .system(command, intern = FALSE, \dots,
+#'     dry.run = FALSE, mustWork = NA, quiet = intern)
+#'
+#' @param command,intern,\dots arguments passed to \code{\link{system}()}.
+#' @param dry.run \code{TRUE} or \code{FALSE}; return the command without invoking?
+#' @param mustWork a logical; if \code{TRUE} failure to run the command will give
+#'   an \R error, if \code{NA} a warning, and if \code{FALSE}, no \R message.
+#' @param quiet \code{TRUE} or \code{FALSE}; print a message before and after
+#'   invoking \code{command}?
+#'
+#' @section Value:
+#' if \code{dry.run} is \code{TRUE}, \code{command}.
+#'
+#' if \code{intern} is \code{FALSE}, the result of \code{system()} invisibly.
+#'
+#' if \code{intern} is \code{TRUE}, the result of \code{system()} visibly.
+#'
+#' @seealso
+#' \code{\link{system}}
+#'
+#' @export
 .system <- function (command, intern = FALSE, ..., dry.run = FALSE, mustWork = NA,
     quiet = intern)
 {
@@ -196,6 +347,48 @@
 }
 
 
+#' Class R Objects
+#'
+#' @aliases make_R as_R
+#'
+#' @description
+#' Create or coerce objects of class \code{"R"} containing information about the
+#' specified installation of \R.
+#'
+#' @usage make_R(bin = NULL)
+#' @usage as_R(x, \dots)
+#'
+#' @param bin \code{NULL} or character string; \code{"bin"} component of the \R
+#'   home directory.
+#' @param x object to be coerced.
+#' @param \dots further arguments passed to or from other methods.
+#'
+#' @section Value:
+#' An object of class \code{"R"} with at least the following members:
+#'
+#' \describe{
+#'   \item{bin}{
+#'
+#'     \code{"bin"} component of the \R home directory.}
+#'
+#'   \item{version}{
+#'
+#'     corresponding version of \R as an \code{\link{R_system_version}} object.}
+#'
+#'   \item{major_minor}{
+#'
+#'     corresponding version of \R as a character string, excluding the patch
+#'     level.}
+#'
+#'   \item{svn_rev}{
+#'
+#'     corresponding Subversion revision number, see \code{?\link{R.Version}}.}
+#' }
+#'
+#' @examples
+#' make_R()
+#'
+#' @export
 make_R <- function (bin = NULL)
 {
     R_version_pattern <- "^(([[:digit:]]+)\\.([[:digit:]]+))\\.[[:digit:]]+$"
@@ -238,6 +431,7 @@ make_R <- function (bin = NULL)
 }
 
 
+#' @export
 as_R <- function (x, ...)
 {
     if (missing(x) || is.null(x))
@@ -246,11 +440,32 @@ as_R <- function (x, ...)
 }
 
 
+#' Coerce to an Object of Class R
+#'
+#' @aliases as_R.R as_R.default
+#'
+#' @description
+#' Functions to coerce an object to class \code{"R"} if possible.
+#'
+#' @usage as_R.R(x, \dots)
+#' @usage as_R.default(x, \dots)
+#'
+#' @param x any \R object.
+#' @param \dots additional arguments to be passed to or from methods.
+#'
+#' @details
+#' The default method handles \code{NULL} and character strings.
+#'
+#' @section Value:
+#' An object of class \code{"R"}.
+#'
+#' @export
 as_R.R <- function (x, ...)
 x
 registerS3method("as_R", "R", "as_R.R")
 
 
+#' @export
 as_R.default <- function (x, ...)
 {
     if (!is.null(x) && !is.character(x))
@@ -260,6 +475,24 @@ as_R.default <- function (x, ...)
 registerS3method("as_R", "default", "as_R.default")
 
 
+#' Build an R Package
+#'
+#' @description
+#' Build an \R package from a package source in the directory specified by
+#' \code{pkgpath}.
+#'
+#' @usage build_tarball(pkgpath, R = NULL)
+#'
+#' @param pkgpath character string; directory of the package source.
+#' @param R an object of class \code{"R"}, or coercible.
+#'
+#' @details
+#' Invokes \command{R CMD build} to build the \R package.
+#'
+#' @section Value:
+#' character string; filename of the resultant tarball.
+#'
+#' @export
 build_tarball <- function (pkgpath, R = NULL)
 {
     pkgpath <- path.expand(pkgpath)
@@ -286,6 +519,28 @@ build_tarball <- function (pkgpath, R = NULL)
 }
 
 
+#' Copy a Tarball Into a Local Repository
+#'
+#' @description
+#' Copy a package \sQuote{tar} archive into a local repository.
+#'
+#' @usage copy_tarball_to_repos(tarpath, repos_dir, Path = NULL)
+#'
+#' @param tarpath character string; path of the package \sQuote{tar} archive.
+#' @param repos_dir character string; directory of the local repository.
+#' @param Path \code{NULL} or a character string; sub path in which to copy the
+#'   package \sQuote{tar} archive.
+#'
+#' @details
+#' \code{Path} is mostly used by \code{CRAN} to keep the recommended packages in a
+#' separate directory. For example, \code{Path="4.5.0/Recommended"}.
+#'
+#' @section Value:
+#' character string; path of the copied package \sQuote{tar} archive.
+#'
+#' \code{<repos_dir>/src/contrib[/<Path>]/<pkgname>_<version>.tar.gz}
+#'
+#' @export
 copy_tarball_to_repos <- function (tarpath, repos_dir, Path = NULL)
 {
     tarpath <- path.expand(tarpath)
@@ -335,7 +590,7 @@ copy_tarball_to_repos <- function (tarpath, repos_dir, Path = NULL)
         overwrite = TRUE,
         copy.date = TRUE
     )) {
-        stop("failure to rename")
+        stop("failure to copy")
     }
 
 
@@ -368,6 +623,23 @@ copy_tarball_to_repos <- function (tarpath, repos_dir, Path = NULL)
 }
 
 
+#' Build an R Package in a Local Repository
+#'
+#' @description
+#' Build an \R package from a package source in the directory specified by
+#' \code{pkgpath} into a local repository.
+#'
+#' @usage build_tarball_in_repos(pkgpath, repos_dir, Path = NULL, R = NULL)
+#'
+#' @param pkgpath,R see \code{build_tarball}.
+#' @param repos_dir,Path see \code{copy_tarball_to_repos}.
+#'
+#' @section Value:
+#' character string; path of the package \sQuote{tar} archive.
+#'
+#' \code{<repos_dir>/src/contrib[/<Path>]/<pkgname>_<version>.tar.gz}
+#'
+#' @export
 build_tarball_in_repos <- function (pkgpath, repos_dir, Path = NULL, R = NULL)
 {
     tarpath <- build_tarball(pkgpath, R)
@@ -375,6 +647,22 @@ build_tarball_in_repos <- function (pkgpath, repos_dir, Path = NULL, R = NULL)
 }
 
 
+#' Find Tarball in Local Repository
+#'
+#' @description
+#' Get the path of a package \sQuote{tar} archive in a local repository.
+#'
+#' @usage find_tarball_in_repos(pkgname, repos_dir)
+#'
+#' @param pkgname character string; name of the \R package to find.
+#' @param repos_dir character string; directory of the local repository.
+#'
+#' @section Value:
+#' character string; path of the package \sQuote{tar} archive.
+#'
+#' \code{<repos_dir>/src/contrib[/<Path>]/<pkgname>_<version>.tar.gz}
+#'
+#' @export
 find_tarball_in_repos <- function (pkgname, repos_dir)
 {
     repos_dir <- path.expand(repos_dir)
@@ -403,6 +691,34 @@ find_tarball_in_repos <- function (pkgname, repos_dir)
 }
 
 
+#' Build a Binary
+#'
+#' @description
+#' Build a binary of a package \sQuote{tar} archive.
+#'
+#' @usage build_binary(tarpath, R = NULL)
+#'
+#' @param tarpath character string; path of the package \sQuote{tar} archive.
+#' @param R an object of class \code{"R"}, or coercible.
+#'
+#' @details
+#' Invokes \command{R CMD INSTALL --build} to build the \R package binary.
+#'
+#' @section Value:
+#' A list with at least the following components:
+#'
+#' \describe{
+#'   \item{binpath}{
+#'
+#'     character string; filename of the resultant binary.}
+#'
+#'   \item{bin_dir}{
+#'
+#'     character string; sub path for which the binary should be placed in a
+#'     repository.}
+#' }
+#'
+#' @export
 build_binary <- function (tarpath, R = NULL)
 {
     tarpath <- path.expand(tarpath)
@@ -437,6 +753,32 @@ build_binary <- function (tarpath, R = NULL)
 }
 
 
+#' Build a Binary From a Local Repository
+#'
+#' @description
+#' Build a binary of a package \sQuote{tar} archive from a local repository.
+#'
+#' @usage build_binary_from_repos(pkgname, repos_dir, R = NULL)
+#'
+#' @param pkgname character string; name of the \R package.
+#' @param repos_dir character string; directory of the local repository.
+#' @param R an object of class \code{"R"}, or coercible.
+#'
+#' @section Value:
+#' A list with at least the following components:
+#'
+#' \describe{
+#'   \item{binpath}{
+#'
+#'     character string; filename of the resultant binary.}
+#'
+#'   \item{bin_dir}{
+#'
+#'     character string; sub path for which the binary should be placed in a
+#'     repository.}
+#' }
+#'
+#' @export
 build_binary_from_repos <- function (pkgname, repos_dir, R = NULL)
 {
     tarpath <- find_tarball_in_repos(pkgname, repos_dir)
@@ -444,6 +786,30 @@ build_binary_from_repos <- function (pkgname, repos_dir, R = NULL)
 }
 
 
+#' Copy a Binary Into a Local Repository
+#'
+#' @description
+#' Copy a package binary into a local repository.
+#'
+#' @usage copy_binary_to_repos(binpath, repos_dir, bin_dir)
+#'
+#' @param binpath character string; path of the package binary.
+#' @param repos_dir character string; directory of the local repository.
+#' @param bin_dir character string; sub path for which the binary should be placed.
+#'
+#' @details
+#' \code{bin_dir} would typically be something like:
+#'
+#' \code{"bin/windows/contrib/4.4"}
+#'
+#' \code{"bin/macosx/big-sur-arm64/contrib/4.4"}
+#'
+#' @section Value:
+#' character string; path of the copied package binary.
+#'
+#' \code{<repos_dir>/<bin_dir>/<pkgname>_<version>.[zip|tgz]}
+#'
+#' @export
 copy_binary_to_repos <- function (binpath, repos_dir, bin_dir)
 {
     binpath <- path.expand(binpath)
@@ -510,6 +876,21 @@ copy_binary_to_repos <- function (binpath, repos_dir, bin_dir)
 }
 
 
+#' Build a Binary in a Local Repository
+#'
+#' @description
+#' Build a binary of a package \sQuote{tar} archive in a local repository.
+#'
+#' @usage build_binary_in_repos(pkgname, repos_dir, R = NULL)
+#'
+#' @param pkgname character string; name of the \R package.
+#' @param repos_dir character string; directory of the local repository.
+#' @param R an object of class \code{"R"}, or coercible.
+#'
+#' @section Value:
+#' character string; path of the package binary.
+#'
+#' @export
 build_binary_in_repos <- function (pkgname, repos_dir, R = NULL)
 {
     x <- build_binary_from_repos(pkgname, repos_dir, R)
@@ -517,6 +898,51 @@ build_binary_in_repos <- function (pkgname, repos_dir, R = NULL)
 }
 
 
+#' Class repos Objects
+#'
+#' @description
+#' Create objects of class \code{"repos"}.
+#'
+#' @usage make_repos(repos_dir)
+#'
+#' @param repos_dir character string; directory of the local repository.
+#'
+#' @section Value:
+#' An object of class \code{"repos"} with at least the following members:
+#'
+#' \describe{
+#'   \item{repos_dir}{
+#'
+#'     character string; directory of the local repository.}
+#'
+#'   \item{copy_tarball}{
+#'
+#'     function with formals \code{(tarpath, Path = NULL)} that copies a package
+#'     \sQuote{tar} archive into the local repository.}
+#'
+#'   \item{build_tarball}{
+#'
+#'     function with formals \code{(pkgpath, Path = NULL, R = NULL)} that builds
+#'     an \R package from a package source in the directory specified by
+#'     \code{pkgpath} into the local repository.}
+#'
+#'   \item{find_tarball}{
+#'
+#'     function with formals \code{(pkgname)} that gets the path of a package
+#'     \sQuote{tar} archive in the local repository.}
+#'
+#'   \item{copy_binary}{
+#'
+#'     function with formals \code{(binpath, bin_dir)} that copies a package
+#'     binary into the local repository.}
+#'
+#'   \item{build_binary}{
+#'
+#'     function with formals \code{(pkgname, R = NULL)} that builds a binary of a
+#'     package \sQuote{tar} archive in the local repository.}
+#' }
+#'
+#' @export
 make_repos <- function (repos_dir)
 {
     repos_dir <- path.expand(repos_dir)
