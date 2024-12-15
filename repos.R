@@ -278,6 +278,185 @@
 }
 
 
+#' @export
+.switch2 <- function (EXPR, TRUE_expr = invisible(), FALSE_expr = invisible(),
+    alt_expr = invisible())
+{
+    if (is.character(EXPR)) {
+        switch(EXPR,
+        T = ,
+        `TRUE` = ,
+        True = ,
+        true = TRUE_expr,
+        F = ,
+        `FALSE` = ,
+        False = ,
+        false = FALSE_expr,
+        if (!is.na(EXPR)) alt_expr else if (EXPR) NULL)
+    }
+    else if (EXPR)
+        TRUE_expr
+    else FALSE_expr
+}
+
+
+#' @export
+.make_R_CMD_build_opts <- function (
+    ...,
+    force = FALSE,
+    keep_empty_dirs = FALSE,
+    no_build_vignettes = FALSE,
+    no_manual = FALSE,
+    resave_data = FALSE, no_resave_data = FALSE,
+    compact_vignettes = FALSE,
+    compression = NULL,
+    md5 = FALSE,
+    log = FALSE,
+    user = NULL)
+{
+    dots <- list(...)
+    n <- names(dots)
+    if (!is.null(n) && length(i <- which(nzchar(n)))) {
+        f <- setdiff(names(formals()), "...")
+        f <- utils::capture.output(print(f, quote = FALSE, max = 99))
+        warning(
+            "named argument(s) ",
+            paste(dQuote(n[i]), collapse = ", "),
+            "\ndo not match names of formals:\n",
+            paste(f, collapse = "\n")
+        )
+        names(dots) <- NULL
+    }
+    if (!all(vapply(dots, is.character, NA))) {
+        stop("non-character argument(s)")
+    }
+    c(
+        if (force) "--force",
+        if (keep_empty_dirs) "--keep-empty-dirs",
+        if (no_build_vignettes) "--no-build-vignettes",
+        if (no_manual) "--no-manual",
+        .switch2(resave_data,
+        TRUE_expr = "--resave-data",
+        FALSE_expr = if (no_resave_data) "--no-resave-data",
+        alt_expr = paste0("--resave-data=", match.arg(resave_data, c("no", "best", "gzip")))
+        ),
+        .switch2(compact_vignettes,
+        TRUE_expr = "--compact-vignettes",
+        alt_expr = paste0("--compact-vignettes=", match.arg(compact_vignettes, c("no", "qpdf", "gs", "gs+qpdf", "both")))
+        ),
+        if (!is.null(compression))
+            paste0("--compression=", match.arg(compression, c("gzip", "none", "bzip2", "xz"))),
+        if (md5) "--md5",
+        if (log) "--log",
+        if (!is.null(user)) {
+            if (is.character(user) && length(user) == 1L)
+                paste0("--user=", user)
+            else stop(gettextf("invalid '%s' value", "user", domain = "R"), domain = NA)
+        },
+        dots,
+        recursive = TRUE,
+        use.names = FALSE
+    )
+}
+
+
+#' @export
+.make_R_CMD_INSTALL_opts <- function(
+    ...,
+    clean = FALSE,
+    preclean = FALSE,
+    debug = FALSE,
+    library = NULL,
+    no_configure = FALSE,
+    no_docs = FALSE,
+    html = FALSE, no_html = FALSE,
+    latex = FALSE,
+    example = FALSE,
+    fake = FALSE,
+    no_lock = FALSE,
+    lock = FALSE,
+    pkglock = FALSE,
+    build = FALSE,
+    install_tests = FALSE,
+    no_R = FALSE, no_libs = FALSE, no_data = FALSE, no_help = FALSE, no_demo = FALSE, no_exec = FALSE, no_inst = FALSE,
+    no_multiarch = FALSE,
+    libs_only = FALSE,
+    data_compress = NULL,
+    resave_data = FALSE,
+    compact_docs = FALSE,
+    with_keep.source = FALSE, without_keep.source = FALSE,
+    with_keep.parse.data = FALSE, without_keep.parse.data = FALSE,
+    byte_compile = FALSE, no_byte_compile = FALSE,
+    staged_install = FALSE, no_staged_install = FALSE,
+    no_test_load = FALSE,
+    no_clean_on_error = FALSE,
+    merge_multiarch = FALSE,
+    use_vanilla = FALSE,
+    use_LTO = FALSE, no_use_LTO = FALSE)
+{
+    dots <- list(...)
+    n <- names(dots)
+    if (!is.null(n) && length(i <- which(nzchar(n)))) {
+        f <- setdiff(names(formals()), "...")
+        f <- utils::capture.output(print(f, quote = FALSE, max = 99))
+        warning(
+            "named argument(s) ",
+            paste(dQuote(n[i]), collapse = ", "),
+            "\ndo not match names of formals:\n",
+            paste(f, collapse = "\n")
+        )
+        names(dots) <- NULL
+    }
+    if (!all(vapply(dots, is.character, NA))) {
+        stop("non-character argument(s)")
+    }
+    c(
+        if (clean) "--clean",
+        if (preclean) "--preclean",
+        if (debug) "--debug",
+        if (!is.null(library)) {
+            if (is.character(library) && length(library) == 1L)
+                paste0("--library=", library)
+            else stop(gettextf("invalid '%s' value", "library", domain = "R"), domain = NA)
+        },
+        if (no_configure) "--no-configure",
+        if (no_docs) "--no-docs",
+        if (html) "--html" else if (no_html) "--no-html",
+        if (latex) "--latex",
+        if (example) "--example",
+        if (fake) "--fake",
+        if (no_lock) "--no-lock" else if (lock) "--lock" else if (pkglock) "--pkglock",
+        if (build) "--build",
+        if (install_tests) "--install-tests",
+        if (no_R) "--no-R",
+        if (no_libs) "--no-libs",
+        if (no_data) "--no-data",
+        if (no_help) "--no-help",
+        if (no_demo) "--no-demo",
+        if (no_exec) "--no-exec",
+        if (no_inst) "--no-inst",
+        if (no_multiarch) "--no-multiarch",
+        if (libs_only) "--libs-only",
+        if (!is.null(data_compress))
+            paste0("--data-compress=", match.arg(data_compress, c("gzip", "none", "bzip2", "xz"))),
+        if (resave_data) "--resave-data",
+        if (compact_docs) "--compact-docs",
+        if (with_keep.source) "--with-keep.source" else if (without_keep.source) "--without-keep.source",
+        if (with_keep.parse.data) "--with-keep.parse.data" else if (without_keep.parse.data) "--without-keep.parse.data",
+        if (byte_compile) "--byte-compile" else if (no_byte_compile) "--no-byte-compile",
+        if (staged_install) "--staged-install" else if (no_staged_install) "--no-staged-install",
+        if (no_test_load) "--no-test-load",
+        if (no_clean_on_error) "--no-clean-on-error",
+        if (merge_multiarch) "--merge-multiarch",
+        if (use_vanilla) "--use-vanilla",
+        if (use_LTO) "--use-LTO" else if (no_use_LTO) "--no-use-LTO",
+        dots,
+        recursive = TRUE,
+        use.names = FALSE
+    )
+}
+
+
 #' Invoke a System Command
 #'
 #' @description
@@ -481,10 +660,11 @@ registerS3method("as_R", "default", "as_R.default")
 #' Build an \R package from a package source in the directory specified by
 #' \code{pkgpath}.
 #'
-#' @usage build_tarball(pkgpath, R = NULL)
+#' @usage build_tarball(pkgpath, R = NULL, opts = NULL)
 #'
 #' @param pkgpath character string; directory of the package source.
 #' @param R an object of class \code{"R"}, or coercible.
+#' @param opts further options to \command{R CMD build}.
 #'
 #' @details
 #' Invokes \command{R CMD build} to build the \R package.
@@ -493,7 +673,7 @@ registerS3method("as_R", "default", "as_R.default")
 #' character string; filename of the resultant tarball.
 #'
 #' @export
-build_tarball <- function (pkgpath, R = NULL)
+build_tarball <- function (pkgpath, R = NULL, opts = NULL)
 {
     pkgpath <- path.expand(pkgpath)
 
@@ -511,10 +691,20 @@ build_tarball <- function (pkgpath, R = NULL)
         stop("invalid package DESCRIPTION file")
 
 
+    ## the return value
     tarpath <- paste0(pkgname, "_", version, ".tar.gz")
-    args <- c(.find_R_CMD(r_bin), "build", shQuote(pkgpath))
+
+
+    opts <- if (is.null(opts))
+        .make_R_CMD_build_opts()
+    else if (is.character(opts) && is.null(names(opts)))
+        opts
+    else do.call(".make_R_CMD_build_opts", opts, quote = TRUE)
+    args <- c(.find_R_CMD(r_bin), "build", opts, shQuote(pkgpath))
     command <- paste(args, collapse = " ")
     .system(command, mustWork = TRUE)
+
+
     tarpath
 }
 
@@ -629,10 +819,11 @@ copy_tarball_to_repos <- function (tarpath, repos_dir, Path = NULL)
 #' Build an \R package from a package source in the directory specified by
 #' \code{pkgpath} into a local repository.
 #'
-#' @usage build_tarball_in_repos(pkgpath, repos_dir, Path = NULL, R = NULL)
+#' @usage build_tarball_in_repos(pkgpath, repos_dir, Path = NULL, R = NULL, opts = NULL)
 #'
 #' @param pkgpath,R see \code{build_tarball}.
 #' @param repos_dir,Path see \code{copy_tarball_to_repos}.
+#' @param opts further options to \command{R CMD build}.
 #'
 #' @section Value:
 #' character string; path of the package \sQuote{tar} archive.
@@ -640,9 +831,9 @@ copy_tarball_to_repos <- function (tarpath, repos_dir, Path = NULL)
 #' \code{<repos_dir>/src/contrib[/<Path>]/<pkgname>_<version>.tar.gz}
 #'
 #' @export
-build_tarball_in_repos <- function (pkgpath, repos_dir, Path = NULL, R = NULL)
+build_tarball_in_repos <- function (pkgpath, repos_dir, Path = NULL, R = NULL, opts = NULL)
 {
-    tarpath <- build_tarball(pkgpath, R)
+    tarpath <- build_tarball(pkgpath, R, opts)
     copy_tarball_to_repos(tarpath, repos_dir, Path)
 }
 
@@ -696,10 +887,11 @@ find_tarball_in_repos <- function (pkgname, repos_dir)
 #' @description
 #' Build a binary of a package \sQuote{tar} archive.
 #'
-#' @usage build_binary(tarpath, R = NULL)
+#' @usage build_binary(tarpath, R = NULL, opts = NULL)
 #'
 #' @param tarpath character string; path of the package \sQuote{tar} archive.
 #' @param R an object of class \code{"R"}, or coercible.
+#' @param opts further options to \command{R CMD INSTALL --build}.
 #'
 #' @details
 #' Invokes \command{R CMD INSTALL --build} to build the \R package binary.
@@ -719,7 +911,7 @@ find_tarball_in_repos <- function (pkgname, repos_dir)
 #' }
 #'
 #' @export
-build_binary <- function (tarpath, R = NULL)
+build_binary <- function (tarpath, R = NULL, opts = NULL)
 {
     tarpath <- path.expand(tarpath)
 
@@ -743,7 +935,12 @@ build_binary <- function (tarpath, R = NULL)
     bin_dir <- file.path("bin", platform, "contrib", r_major_minor)
 
 
-    args <- c(.find_R_CMD(r_bin), "INSTALL", "--build", shQuote(tarpath))
+    opts <- if (is.null(opts))
+        .make_R_CMD_INSTALL_opts()
+    else if (is.character(opts) && is.null(names(opts)))
+        opts
+    else do.call(".make_R_CMD_INSTALL_opts", opts, quote = TRUE)
+    args <- c(.find_R_CMD(r_bin), "INSTALL", "--build", opts, shQuote(tarpath))
     command <- paste(args, collapse = " ")
     # unloadNamespace("essentials"); unloadNamespace("this.path"); stop("remove this later")
     .system(command, mustWork = TRUE)
@@ -758,11 +955,12 @@ build_binary <- function (tarpath, R = NULL)
 #' @description
 #' Build a binary of a package \sQuote{tar} archive from a local repository.
 #'
-#' @usage build_binary_from_repos(pkgname, repos_dir, R = NULL)
+#' @usage build_binary_from_repos(pkgname, repos_dir, R = NULL, opts = NULL)
 #'
 #' @param pkgname character string; name of the \R package.
 #' @param repos_dir character string; directory of the local repository.
 #' @param R an object of class \code{"R"}, or coercible.
+#' @param opts further options to \command{R CMD INSTALL --build}.
 #'
 #' @section Value:
 #' A list with at least the following components:
@@ -779,10 +977,10 @@ build_binary <- function (tarpath, R = NULL)
 #' }
 #'
 #' @export
-build_binary_from_repos <- function (pkgname, repos_dir, R = NULL)
+build_binary_from_repos <- function (pkgname, repos_dir, R = NULL, opts = NULL)
 {
     tarpath <- find_tarball_in_repos(pkgname, repos_dir)
-    build_binary(tarpath, R)
+    build_binary(tarpath, R, opts)
 }
 
 
@@ -881,19 +1079,20 @@ copy_binary_to_repos <- function (binpath, repos_dir, bin_dir)
 #' @description
 #' Build a binary of a package \sQuote{tar} archive in a local repository.
 #'
-#' @usage build_binary_in_repos(pkgname, repos_dir, R = NULL)
+#' @usage build_binary_in_repos(pkgname, repos_dir, R = NULL, opts = NULL)
 #'
 #' @param pkgname character string; name of the \R package.
 #' @param repos_dir character string; directory of the local repository.
 #' @param R an object of class \code{"R"}, or coercible.
+#' @param opts further options to \command{R CMD INSTALL --build}.
 #'
 #' @section Value:
 #' character string; path of the package binary.
 #'
 #' @export
-build_binary_in_repos <- function (pkgname, repos_dir, R = NULL)
+build_binary_in_repos <- function (pkgname, repos_dir, R = NULL, opts = NULL)
 {
-    x <- build_binary_from_repos(pkgname, repos_dir, R)
+    x <- build_binary_from_repos(pkgname, repos_dir, R, opts)
     copy_binary_to_repos(x$binpath, repos_dir, x$bin_dir)
 }
 
@@ -922,9 +1121,9 @@ build_binary_in_repos <- function (pkgname, repos_dir, R = NULL)
 #'
 #'   \item{build_tarball}{
 #'
-#'     function with formals \code{(pkgpath, Path = NULL, R = NULL)} that builds
-#'     an \R package from a package source in the directory specified by
-#'     \code{pkgpath} into the local repository.}
+#'     function with formals \code{(pkgpath, Path = NULL, R = NULL, opts = NULL)}
+#'     that builds an \R package from a package source in the directory specified
+#'     by \code{pkgpath} into the local repository.}
 #'
 #'   \item{find_tarball}{
 #'
@@ -938,8 +1137,8 @@ build_binary_in_repos <- function (pkgname, repos_dir, R = NULL)
 #'
 #'   \item{build_binary}{
 #'
-#'     function with formals \code{(pkgname, R = NULL)} that builds a binary of a
-#'     package \sQuote{tar} archive in the local repository.}
+#'     function with formals \code{(pkgname, R = NULL, opts = NULL)} that builds a
+#'     binary of a package \sQuote{tar} archive in the local repository.}
 #' }
 #'
 #' @export
@@ -950,14 +1149,14 @@ make_repos <- function (repos_dir)
         repos_dir = repos_dir,
         copy_tarball = function (tarpath, Path = NULL)
 copy_tarball_to_repos(tarpath, repos_dir, Path),
-        build_tarball = function (pkgpath, Path = NULL, R = NULL)
-build_tarball_in_repos(pkgpath, repos_dir, Path, R),
+        build_tarball = function (pkgpath, Path = NULL, R = NULL, opts = NULL)
+build_tarball_in_repos(pkgpath, repos_dir, Path, R, opts),
         find_tarball = function (pkgname)
 find_tarball_in_repos(pkgname, repos_dir),
         copy_binary = function (binpath, bin_dir)
 copy_binary_to_repos(binpath, repos_dir, bin_dir),
-        build_binary = function (pkgname, R = NULL)
-build_binary_in_repos(pkgname, repos_dir, R)
+        build_binary = function (pkgname, R = NULL, opts = NULL)
+build_binary_in_repos(pkgname, repos_dir, R, opts)
     )
     class(x) <- "repos"
     x

@@ -24,8 +24,8 @@ repos$copy_tarball("~/this.path/this.path_2.5.0.77.tar.gz", "4.5.0/Recommended")
 repos$find_tarball("this.path")
 
 
-dir.create(file.path(repos$repos_dir, "bin", "windows", "contrib", "4.4"), showWarnings = FALSE, recursive = TRUE)
-file.create(file.path(repos$repos_dir, "bin", "windows", "contrib", "4.4", "this.path_2.5.0.76.zip"))
+ dir.create(file.path(repos$repos_dir, "bin/windows/contrib/4.4"), showWarnings = FALSE, recursive = TRUE)
+file.create(file.path(repos$repos_dir, "bin/windows/contrib/4.4/this.path_2.5.0.76.zip"))
 
 
 unloadNamespace("essentials"); unloadNamespace("this.path")
@@ -50,7 +50,7 @@ write.dcf(read.dcf(file.path(repos$repos_dir, "bin/macosx/big-sur-arm64/contrib/
 main <- function (args = this.path::progArgs())
 {
     # args <- "this.path"; stop("remove this later")
-    # args <- c("this.path (R == 4.4)", "essentials (R >= 4.0)", "iris "); stop("remove this later")
+    # args <- c("this.path (R >= 2.14.0) (R >= r56550)", "essentials (R >= 4.0)", "iris "); stop("remove this later")
     if (length(args) <= 0L) {
         if (interactive())
             args <- strsplit(readline("Packages to build binaries: "), ",")[[1L]]
@@ -58,16 +58,69 @@ main <- function (args = this.path::progArgs())
         if (length(args) <= 0L)
             stop("expected at least 1 argument")
     }
-    pattern <- "^[[:blank:]]*([[:alpha:]][[:alnum:].]*[[:alnum:]])(?:[[:blank:]]*\\([[:blank:]]*R[[:blank:]]*(<|>|<=|>=|==)[[:blank:]]*([[:digit:]]+\\.[[:digit:]]+)\\))?[[:blank:]]*$"
+    pkgname_pattern <- "([[:alpha:]][[:alnum:].]*[[:alnum:]])"
+    ops_pattern <- "(<|>|<=|>=|==|!=)"
+    version_patterns <- c(
+        "((?:[[:digit:]]+[.-]){1,}[[:digit:]]+)",
+        "r([[:digit:]]+)"
+    )
+    space_pattern <- "[[:space:]]*"
+    pattern <- paste0(
+        "^",
+        space_pattern,
+        pkgname_pattern,
+            "(",
+            "(?:",
+            space_pattern,
+            "\\(",
+            space_pattern,
+            "R",
+            space_pattern,
+            ops_pattern,
+            space_pattern,
+                "(?:",
+                paste(version_patterns, collapse = "|"),
+                ")",
+            "\\)",
+            ")*",
+            ")",
+        space_pattern,
+        "$"
+    )
     m <- regexec(pattern, args)
-    if (!all(lengths(m) == 4L))
+    if (any(lengths(m) == 1L))
         stop("invalid arguments, must be package names each optionally followed\n by a comment in parentheses specifying an R version requirement\n that is \"<pkgname> (R <op> <version>)\" i.e. \"this.path (R >= 4.0)\"")
     args <- regmatches(args, m)
     args <- lapply(args, function(args) {
-        args <- args[-1L]
-        args <- as.list(args)
-        names(args) <- c("pkgname", "op", "version")
-        args
+        v <- strsplit(args[[3L]], ")", fixed = TRUE)[[1L]]
+        pattern <- paste0(
+            "^",
+            space_pattern,
+            "\\(",
+            space_pattern,
+            "R",
+            space_pattern,
+            ops_pattern,
+            space_pattern,
+                "(?:",
+                paste(version_patterns, collapse = "|"),
+                ")",
+            "$"
+        )
+        m <- regexec(pattern, v)
+        if (any(lengths(m) == 1L))
+            stop("invalid 'pattern'; should never happen, please report!")
+        list(
+            pkgname = args[[2L]],
+            R = lapply(regmatches(v, m), function(r) {
+                list(
+                    op = r[2L],
+                    version = if (nzchar(r[3L]))
+                        package_version(r[3L])
+                    else as.integer(r[4L])
+                )
+            })
+        )
     })
     cmp <- function(e1, op, e2) {
         op <- switch(op, `<` = `<`, `>` = `>`, `<=` = `<=`, `>=` = `>=`, `==` = `==`, NULL)
@@ -114,7 +167,7 @@ main <- function (args = this.path::progArgs())
     }
 
 
-    repos_R <- sourcelike(file.path(main_dir, "src", "repos.R"))
+    repos_R <- sourcelike(file.path(main_dir, "src/repos.R"))
     repos <- repos_R$make_repos(main_dir)
 
 
@@ -165,7 +218,7 @@ main <- function (args = this.path::progArgs())
 
 
     all_pkgs <- read.dcf(
-        file.path(main_dir, "src", "contrib", "PACKAGES"),
+        file.path(main_dir, "src/contrib/PACKAGES"),
         fields = "Package"
     )
 
@@ -181,11 +234,42 @@ main <- function (args = this.path::progArgs())
 
     for (argsi in args) {
         i <- local({
-            i <- cmp(vapply(R, `[[`, "", "major_minor"), argsi$op, argsi$version)
+            i <- rep(TRUE, length(R))
+            names(i) <- names(R)
+            for (argsir in argsi$R) {
+                if (is.numeric_version(argsir$version))
+                    i <- i & cmp(
+                        do.call("c", lapply(R, `[[`, "version")),
+                        argsir$op,
+                        argsir$version
+                    )
+                else
+                    i <- i & cmp(
+                        vapply(R, `[[`, 0L, "svn_rev"),
+                        argsir$op,
+                        argsir$version
+                    )
+            }
             tarpath <- repos$find_tarball(argsi$pkgname)
             depends <- repos_R$.read_DESCRIPTION_from_tarball(tarpath, "Depends")
             depends <- strsplit(depends, ",", fixed = TRUE)[[1L]]
-            pattern <- "^[[:blank:]]*R[[:blank:]]*\\([[:blank:]]*(<|>|<=|>=|==)[[:blank:]]*(?:((?:[[:digit:]]+[.-])*[[:digit:]]+)|r([[:digit:]]+))[[:blank:]]*\\)[[:blank:]]*$"
+            pattern <- paste0(
+                "^",
+                space_pattern,
+                "R",
+                space_pattern,
+                "\\(",
+                space_pattern,
+                ops_pattern,
+                space_pattern,
+                "(?:",
+                paste(version_patterns, collapse = "|"),
+                ")",
+                space_pattern,
+                "\\)",
+                space_pattern,
+                "$"
+            )
             m <- regexec(pattern, depends)
             if (any(keep <- lengths(m) == 4L)) {
                 depends <- regmatches(depends[keep], m[keep])
@@ -204,11 +288,14 @@ main <- function (args = this.path::progArgs())
                         )
                 }
             }
-            names(i) <- names(R)
             i
         })
         for (r in R[which(i)]) {
-            cat("\n", "Building package:", argsi$pkgname, " binary for R ", format(r$version), "\n", sep = "")
+            cat(sprintf(
+                "\nBuilding package:%s binary for R %s\n",
+                argsi$pkgname,
+                format(r$version)
+            ))
             x <- withVisible(
                 tryCatch({
                     invisible(repos$build_binary(argsi$pkgname, r))
