@@ -37,10 +37,10 @@ MD5sum: 891460cb9b01a3de8887f7f5af7c1c5d
 NeedsCompilation: yes
 
 Package: this.path
-Version: 2.7.0.1
+Version: 2.7.0.15
 Depends: R (>= 2.15)
 Suggests: utils, jsonlite, microbenchmark, rprojroot
 Enhances: compiler, box, knitr, plumber, shiny, targets, testthat
 License: MIT + file LICENSE
-MD5sum: 79895aa33be7769788cbfefed1388d55
+MD5sum: cdfdd99a8e6074a25b83eca5e6c17ae0
 NeedsCompilation: yes
