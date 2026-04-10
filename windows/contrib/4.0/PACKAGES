@@ -6,7 +6,7 @@ Enhances: tcltk
 License: MIT + file LICENSE
 
 Package: this.path
-Version: 2.7.1
+Version: 2.8.0
 Depends: R (>= 2.15)
 Suggests: utils, jsonlite, microbenchmark, rprojroot
 Enhances: compiler, box, knitr, plumber, shiny, targets, testthat
